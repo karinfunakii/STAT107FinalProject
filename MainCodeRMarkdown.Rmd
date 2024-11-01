@@ -1,0 +1,15 @@
+---
+title: "MainCodeRMarkdown"
+author: ""
+date: "Change to due date"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+studentperformance <- read.csv("StudentPerformanceFactors.csv")
+head(studentperformance)
+```
