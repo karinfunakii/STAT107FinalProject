@@ -13,3 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 studentperformance <- read.csv("StudentPerformanceFactors.csv")
 head(studentperformance)
 ```
+```{r}
+studentperformance$Progress <- studentperformance$Exam_Score - studentperformance$Previous_Scores
+head(studentperformance, 5)
+```
