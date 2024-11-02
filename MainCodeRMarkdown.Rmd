@@ -5,6 +5,14 @@ date: "Change to due date"
 output: html_document
 ---
 
+```{r install}
+if(!require(knitr)){
+    install.packages("knitr", repos = "https://cran.r-project.org")
+    library(knitr)
+}
+
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -17,3 +25,7 @@ head(studentperformance)
 studentperformance$Progress <- studentperformance$Exam_Score - studentperformance$Previous_Scores
 head(studentperformance, 5)
 ```
+
+
+
+
