@@ -10,7 +10,6 @@ if(!require(knitr)){
     install.packages("knitr", repos = "https://cran.r-project.org")
     library(knitr)
 }
-
 ```
 
 ```{r setup, include=FALSE}
@@ -21,11 +20,21 @@ knitr::opts_chunk$set(echo = TRUE)
 studentperformance <- read.csv("StudentPerformanceFactors.csv")
 head(studentperformance)
 ```
+
 ```{r}
 studentperformance$Progress <- studentperformance$Exam_Score - studentperformance$Previous_Scores
 head(studentperformance, 5)
 ```
 
+#Question: Does family income affect the average educational progress? 
+
+#Karin: ANOVA 
+#Chenzi: Post-hoc ANOVA 
+#Eric: Interpretation of Visualizations / For loops for Anova Testing and visualization / Backward function for linear regression 
+#Kashish: Visualization 
+
+#Family Income as correlated to other variables: 
+#Variable: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, Family_Income, School_Type, Parental_Educational_Level 
 
 
 
