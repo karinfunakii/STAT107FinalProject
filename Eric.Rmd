@@ -1,0 +1,512 @@
+
+
+Load and use any Packages or Libraries here
+```{r}
+# Use install.packages("corrplot") and library(corrplot)):
+library(corrplot)
+# Use install.packages("car") and library(car)):
+library(car) 
+```
+
+
+
+
+
+Import and load in dataset (and take a look at each variable type in the dataset)
+```{r}
+setwd("~/Downloads")
+studentperformance <- read.csv("StudentPerformanceFactors.csv")
+studentperformance
+sapply(studentperformance, class)
+```
+
+
+Clean up data by removing rows with any missing values
+```{r}
+cleaned_data <- na.omit(studentperformance)
+if (nrow(cleaned_data) == 0) {
+  stop("All rows contain missing values. Cannot proceed with model.")
+}
+```
+
+
+
+
+
+Modify the classes of the variables in the dataset so that it can be analyzed properly in rstudio
+```{r}
+#Change the class type of all categorical variables to factor levels so they could be seen as categories when analyzing using r. Continuous variables being the integer type is good
+cleaned_data[] <- lapply(cleaned_data, function(x) {
+  if (is.character(x)) 
+    as.factor(x) 
+  else 
+    x
+})
+
+sapply(cleaned_data, class)
+```
+
+
+
+Summarize the entire dataset (EDA)
+```{r}
+summary(cleaned_data)
+
+for (i in 1:4) {
+  cat("\n") 
+}
+
+str(cleaned_data)
+```
+
+
+
+
+Visualize Relationships for the Quantitative Variables (EDA)
+```{r}
+# "Exam_Score" is the dependent variable
+dependent_var <- "Exam_Score"
+
+# Identify continuous variables (numeric columns)
+quantitative_vars <- names(cleaned_data)[sapply(cleaned_data, is.numeric)]
+
+# Exclude "Exam_Score" from the quantitative variables
+quantitative_vars <- setdiff(quantitative_vars, dependent_var)
+
+# Loop through continuous variables and create scatterplots and boxplots
+for (quant_var in quantitative_vars) {
+  # Create the formula dynamically for the plot and boxplot
+  formula <- as.formula(paste(dependent_var, "~", quant_var))
+  
+  # Create the scatterplot
+  plot(formula, data = cleaned_data,
+       xlab = quant_var, ylab = "Exam Score", 
+       main = paste0("Exam Score by ", quant_var))
+  
+  # Create the boxplot
+  boxplot(formula, data = cleaned_data,
+          xlab = quant_var, ylab = "Exam Score", 
+          main = paste0("Exam Score by ", quant_var))
+}
+
+```
+
+
+
+
+Visualize Relationships for the Categorical Variables (EDA)
+```{r}
+# "Exam_Score" is the dependent variable
+dependent_var <- "Exam_Score"
+
+# Identify Categorical variables in the dataset
+categorical_vars <- names(cleaned_data)[sapply(cleaned_data, is.factor)]
+
+# Loop through categorical variables and create boxplots
+for (cat_var in categorical_vars) {
+  # Create the formula dynamically for the boxplot
+  formula <- as.formula(paste(dependent_var, "~", cat_var))
+  
+  # Create the boxplot
+  boxplot(formula, data = cleaned_data,
+          xlab = cat_var, ylab = "Exam Score", 
+          main = paste0("Exam Score by ", cat_var))
+}
+
+```
+
+
+
+Calculate the correlation matrix for continuous variables 
+```{r}
+numeric_vars <- cleaned_data[, sapply(cleaned_data, is.numeric)]
+cor_matrix <- cor(numeric_vars, use = "complete.obs")
+corrplot(cor_matrix, method = "circle")
+```
+
+
+
+Perform ANOVA test to find statistical differences between categorical variables in relation with Exam_score:
+```{r}
+# Initialize lists to store results
+anova_results <- list()
+pairwise_results <- list()
+
+for (cat_var in categorical_vars) {
+  # Construct the formula for ANOVA
+  formula <- as.formula(paste(dependent_var, "~", cat_var))
+  
+  # Perform the ANOVA
+  anova_result <- aov(formula, data = cleaned_data)
+  anova_results[[cat_var]] <- summary(anova_result)
+  
+  # Print ANOVA summary
+  cat("\nANOVA for", cat_var, ":\n")
+  print(summary(anova_result))
+  
+  # --- Assumption Checks ---
+  # 1. Normality of residuals
+  ks_test <- ks.test(residuals(anova_result), "pnorm", mean = mean(residuals(anova_result)), sd =       sd(residuals(anova_result)))
+  cat("\nKolmogorov-Smirnov Test for Normality:\n")
+  print(ks_test)
+  
+  # 2. Homogeneity of variances
+  levene_test <- leveneTest(formula, data = cleaned_data) #Used library(car)
+  cat("\nLevene's Test for Homogeneity of Variances:\n")
+  print(levene_test)
+  
+  # --- Post-Hoc Tests ---
+  if (levene_test$`Pr(>F)`[1] > 0.05) {
+    # Variances are equal: Use Tukey's HSD
+    posthoc_result <- TukeyHSD(anova_result)
+    cat("\nTukeyHSD Post-Hoc Test:\n")
+    print(posthoc_result)
+  } else {
+    # Variances are not equal: Use Pairwise t-tests with corrections
+    posthoc_result <- pairwise.t.test(
+      cleaned_data[[dependent_var]], 
+      cleaned_data[[cat_var]], 
+      p.adjust.method = "holm"
+    )
+    cat("\nPairwise t-test with Holm correction:\n")
+    print(posthoc_result)
+  }
+  
+  # Store pairwise results
+  pairwise_results[[cat_var]] <- posthoc_result
+}
+```
+
+
+
+Fit a Multiple Linear Regression Model
+```{r}
+# Perform multiple linear regression
+model <- lm(Exam_Score ~ ., data = cleaned_data)
+
+# Summarize the regression model
+summary(model)
+
+#Note: R does not include all levels of a categorical variable in the model to avoid the problem of multicollinearity (i.e., perfect correlation between the dummy variables). It drops one level and uses it as the reference group. The remaining levels are included as dummy variables that indicate whether each observation belongs to that level.
+```
+
+
+
+Multiple Linear Regression Conditions Check 
+```{r}
+## End(No test)
+opar <- par(mfrow = c(2,2), oma = c(0, 0, 1.1, 0))
+plot(model, las = 1)      # Residuals, Fitted, ...
+```
+
+
+
+Multiple Linear Regression Conditions Check (Bigger Pictures)
+```{r}
+# Fit the multiple linear regression model
+model <- lm(Exam_Score ~ ., data = cleaned_data)
+
+# 1. Residuals vs. Fitted Values (Linearity and Homoscedasticity)
+plot(model, which = 1)
+
+# 2. Normal Q-Q Plot (Normality of Residuals)
+plot(model, which = 2)
+
+# 3. Scale-Location Plot (Homoscedasticity)
+plot(model, which = 3)
+
+# 4. Residuals vs Leverage Plot (Influential Points)
+plot(model, which = 5)
+```
+
+
+
+
+Making a function for backwards elimination by p-value the RIGHT WAY (BIG NOTE: It just doesn't work...)
+```{r}
+correct_backward_elimination <- function(dataset, dependent_var, significance_level = 0.05) {
+  # Copy the dataset to avoid modifying the original
+  copydata <- dataset
+  
+  # Remove rows with missing values
+  copydata <- na.omit(copydata)
+  if (nrow(copydata) == 0) {
+    stop("All rows contain missing values. Cannot proceed with model.")
+  }
+  
+  # Initialize explanatory variables (all variables except the dependent variable)
+  explanatory_vars <- setdiff(names(copydata), dependent_var)
+  
+  repeat {
+    # If no explanatory variables remain, exit the loop
+    if (length(explanatory_vars) == 0) {
+      message("No more explanatory variables. Stopping.")
+      break
+    }
+    
+    # Check if there are 5 or fewer explanatory variables left
+    if (length(explanatory_vars) <= 5) {
+      message("5 or fewer explanatory variables remaining. Stopping.")
+      break
+    }
+    
+    # Construct the formula for the model
+    model_formula <- as.formula(paste(dependent_var, "~", paste(explanatory_vars, collapse = " + ")))
+    
+    # Debugging step: Print current formula and variables
+    print(paste("Current model formula:", model_formula)) 
+    
+    # Fit the linear model
+    model <- lm(model_formula, data = copydata)
+    model_summary <- summary(model)
+    
+    # Extract p-values for all predictors (excluding the intercept)
+    p_values <- model_summary$coefficients[-1, 4]  # Exclude intercept
+    print("P-values:") 
+    print(p_values)  # Debugging step
+    
+    # Remove any NA values from p-values
+    if (any(is.na(p_values))) {
+      warning("NA p-values detected. Removing corresponding variables.")
+      explanatory_vars <- explanatory_vars[!is.na(p_values)]
+      next
+    }
+    
+    # Find the predictor with the highest p-value
+    max_p_value <- max(p_values, na.rm = TRUE)
+    
+    # Stop the loop if the highest p-value is below the significance level
+    if (max_p_value < significance_level) {
+      message("All remaining variables have p-values below the significance level.")
+      break
+    }
+    
+    # Identify the variable with the highest p-value
+    variable_to_remove <- names(p_values)[which.max(p_values)]
+    if (is.null(variable_to_remove) || variable_to_remove == "") {
+      message("No valid variable to remove. Stopping.")
+      break
+    }
+    print(paste("Removing variable with the highest p-value:", variable_to_remove))  # Debugging step
+    
+    # Check if the variable_to_remove corresponds to a level of a factor
+    factor_match <- sapply(explanatory_vars, function(var) {
+      is.factor(copydata[[var]]) && grepl(var, variable_to_remove)
+    })
+    
+    if (any(factor_match)) {
+      # If it's a level of a factor, check if it's the only level
+      factor_var <- explanatory_vars[which(factor_match)[1]]
+      remaining_levels <- unique(copydata[[factor_var]])
+      
+      if (length(remaining_levels) <= 1) {
+        message("All levels of factor ", factor_var, " have been eliminated. Removing the factor variable.")
+        # If all levels are removed, eliminate the entire factor variable
+        explanatory_vars <- setdiff(explanatory_vars, factor_var)
+      } else {
+        # Remove the eliminated level from the factor variable
+        message("Removing level from factor variable: ", factor_var, " (level: ", variable_to_remove, ")")
+        copydata <- copydata[copydata[[factor_var]] != sub(paste0(factor_var, ""), "", variable_to_remove), ]
+      }
+    } else {
+      # Otherwise, just remove the individual variable
+      explanatory_vars <- setdiff(explanatory_vars, variable_to_remove)
+    }
+    
+    # Remove factor variables that only have one level remaining
+    explanatory_vars <- explanatory_vars[vapply(explanatory_vars, function(var) {
+      !(is.factor(copydata[[var]]) && length(unique(copydata[[var]])) <= 1)
+    }, logical(1))]
+    
+    # Debugging: Print the remaining explanatory variables after each step
+    message("Remaining explanatory variables: ", paste(explanatory_vars, collapse = ", "))
+    
+    # Ensure the loop doesn't continue with no explanatory variables
+    if (length(explanatory_vars) == 0) {
+      message("No explanatory variables left after backward elimination.")
+      break
+    }
+  }
+  
+  # Check if there are any explanatory variables left for the final model
+  if (length(explanatory_vars) == 0) {
+    message("No explanatory variables left after backward elimination.")
+    return(NULL)  # Return NULL to indicate that no model could be fit
+  }
+  
+  # Return the final model
+  final_model <- lm(as.formula(paste(dependent_var, "~", paste(explanatory_vars, collapse = " + "))), data = copydata)
+  return(final_model)
+}
+
+```
+
+
+
+
+
+Using backwards elimination until the model eliminates all variables that do not statistically impact the model are eliminated (Backwards Elimination by P-VALUE with a significance level of 5% = 0.05) (Pt.1)
+```{r}
+# Run backward elimination with the user-defined model and data
+final_model <- backward_elimination(dataset = cleaned_data, dependent_var = "Exam_Score", significance_level = 0.05)
+
+if (!is.null(final_model)) {
+  print(final_model)
+} else {
+  message("No final model could be fit.")
+}
+
+```
+
+
+
+Making a function for backwards elimination by p-value the WRONG WAY (BIG NOTE: This function's big flaw is that it eliminates the entire factor variable as soon as one of its levels is eliminated... but we don't know what else to do to make this work)
+```{r}
+shortcut_backward_elimination <- function(dataset, dependent_var, significance_level = 0.05) {
+  # Copy the dataset to avoid modifying the original
+  copydata <- dataset
+  
+  # Remove rows with missing values
+  copydata <- na.omit(copydata)
+  if (nrow(copydata) == 0) {
+    stop("All rows contain missing values. Cannot proceed with model.")
+  }
+  
+  # Initialize explanatory variables (all variables except the dependent variable)
+  explanatory_vars <- setdiff(names(copydata), dependent_var)
+  
+  repeat {
+    # If no explanatory variables remain, exit the loop
+    if (length(explanatory_vars) == 0) {
+      message("No more explanatory variables. Stopping.")
+      break
+    }
+    
+    # Construct the formula for the model
+    model_formula <- as.formula(paste(dependent_var, "~", paste(explanatory_vars, collapse = " + ")))
+    print(paste("Current model formula:", model_formula))  # Debugging step
+    
+    # Fit the linear model
+    model <- lm(model_formula, data = copydata)
+    model_summary <- summary(model)
+    
+    # Extract p-values for all predictors (excluding the intercept)
+    p_values <- model_summary$coefficients[-1, 4]  # Exclude intercept
+    print(p_values)  # Debugging step
+    
+    # Remove any NA values from p-values
+    if (any(is.na(p_values))) {
+      warning("NA p-values detected. Removing corresponding variables.")
+      explanatory_vars <- explanatory_vars[!is.na(p_values)]
+      next
+    }
+    
+    # Find the predictor with the highest p-value
+    max_p_value <- max(p_values, na.rm = TRUE)
+    
+    # Stop the loop if the highest p-value is below the significance level
+    if (max_p_value < significance_level) {
+      message("All remaining variables have p-values below the significance level.")
+      break
+    }
+    
+    # Identify the variable with the highest p-value
+    variable_to_remove <- names(p_values)[which.max(p_values)]
+    if (is.null(variable_to_remove) || variable_to_remove == "") {
+      message("No valid variable to remove. Stopping.")
+      break
+    }
+    print(paste("Removing variable with the highest p-value:", variable_to_remove))  # Debugging step
+    
+    # Check if the variable_to_remove corresponds to a level of a factor
+    factor_match <- sapply(explanatory_vars, function(var) {
+      is.factor(copydata[[var]]) && grepl(var, variable_to_remove)
+    })
+    
+    if (any(factor_match)) {
+      # If it's a level of a factor, remove the entire factor variable
+      factor_var <- explanatory_vars[which(factor_match)[1]]
+      message("Removing the entire factor variable: ", factor_var)
+      
+      # Remove the factor variable entirely
+      explanatory_vars <- setdiff(explanatory_vars, factor_var)
+    } else {
+      # Otherwise, just remove the individual variable
+      explanatory_vars <- setdiff(explanatory_vars, variable_to_remove)
+    }
+  }
+  
+  # Return the final model
+  final_model <- lm(as.formula(paste(dependent_var, "~", paste(explanatory_vars, collapse = " + "))), data = copydata)
+  return(final_model)
+}
+```
+
+
+
+
+
+Using backwards elimination until the model eliminates all variables that do not statistically impact the model are eliminated (Backwards Elimination by P-VALUE with a significance level of 5% = 0.05) (Pt.1... Version 2)
+```{r}
+# Run backward elimination with the user-defined model and data
+final_model <- shortcut_backward_elimination(dataset = cleaned_data, dependent_var = "Exam_Score", significance_level = 0.05)
+
+if (!is.null(final_model)) {
+  print(final_model)
+} else {
+  message("No final model could be fit.")
+}
+
+```
+
+
+
+
+Using backwards elimination until the model eliminates all variables that do not statistically impact the model are eliminated (Backwards Elimination by P-VALUE with a significance level of 5% = 0.05) (Pt.2, which corresponds to Version 2 backward elimination multiple regression equation)
+```{r}
+#Summarize the final model after backward elimination
+final_model_summary <- summary(final_model)
+final_model_summary
+
+#All the statistically significant predictors and their corresponding p-values in the final model
+final_model_summary$coefficients[-1, 4]
+
+```
+
+
+
+
+Multiple Linear Regression Conditions Check for Final Model 
+```{r}
+## End(No test)
+opar <- par(mfrow = c(2,2), oma = c(0, 0, 1.1, 0))
+plot(final_model, las = 1)      # Residuals, Fitted, ...
+```
+
+
+
+Multiple Linear Regression Conditions Check for Final Model (Bigger Pictures)
+```{r}
+# 1. Residuals vs. Fitted Values (Linearity and Homoscedasticity)
+plot(final_model, which = 1)
+
+# 2. Normal Q-Q Plot (Normality of Residuals)
+plot(final_model, which = 2)
+
+# 3. Scale-Location Plot (Homoscedasticity)
+plot(final_model, which = 3)
+
+# 4. Residuals vs Leverage Plot (Influential Points)
+plot(final_model, which = 5)
+```
+
+
+
+
+
+
+
+
+
+
+
