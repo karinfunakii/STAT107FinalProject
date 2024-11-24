@@ -5,7 +5,7 @@ Load and use any Packages or Libraries here
 # Use install.packages("corrplot") and library(corrplot)):
 library(corrplot)
 # Use install.packages("car") and library(car)):
-library(car) 
+library(car)
 ```
 
 
@@ -44,6 +44,7 @@ cleaned_data[] <- lapply(cleaned_data, function(x) {
 })
 
 sapply(cleaned_data, class)
+cleaned_data
 ```
 
 
@@ -348,7 +349,7 @@ correct_backward_elimination <- function(dataset, dependent_var, significance_le
 Using backwards elimination until the model eliminates all variables that do not statistically impact the model are eliminated (Backwards Elimination by P-VALUE with a significance level of 5% = 0.05) (Pt.1)
 ```{r}
 # Run backward elimination with the user-defined model and data
-final_model <- backward_elimination(dataset = cleaned_data, dependent_var = "Exam_Score", significance_level = 0.05)
+final_model <- correct_backward_elimination(dataset = cleaned_data, dependent_var = "Exam_Score", significance_level = 0.05)
 
 if (!is.null(final_model)) {
   print(final_model)
