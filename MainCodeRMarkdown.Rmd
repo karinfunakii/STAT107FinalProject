@@ -10,20 +10,26 @@ if(!require(knitr)){
     install.packages("knitr", repos = "https://cran.r-project.org")
     library(knitr)
 }
+
+if(!require(tidyverse)){
+  install.packages("tidyverse")
+  library(tidyverse)
+}
+
+if(!require(ggbeeswarm)){
+ install.packages("ggbeeswarm")
+  library(ggbeeswarm)
+}
+
+if(!require(ggforce)){
+ install.packages("ggforce")
+  library(ggforce)
+}  
+
 ```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r}
-studentperformance <- read.csv("StudentPerformanceFactors.csv")
-head(studentperformance)
-```
-
-```{r}
-studentperformance$Progress <- studentperformance$Exam_Score - studentperformance$Previous_Scores
-head(studentperformance, 5)
 ```
 
 #Question: Does family income affect the average educational progress? 
@@ -36,5 +42,130 @@ head(studentperformance, 5)
 #Family Income as correlated to other variables: 
 #Variable: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, Family_Income, School_Type, Parental_Educational_Level 
 
+```{r}
+#read initial data
+studentperformance.initial <- read.csv("StudentPerformanceFactors.csv")
+head(studentperformance.initial)
+```
+
+```{r}
+#clean data
+cleaned_data <- na.omit(studentperformance.initial)
+if (nrow(cleaned_data) == 0) {
+  stop("All rows contain missing values. Cannot proceed with model.")
+}
+```
+
+```{r}
+#change the class type of all categorical variables to factor levels so they could be seen as categories when analyzing using r. continuous variables being the integer type is good
+cleaned_data[] <- lapply(cleaned_data, function(x) {
+  if (is.character(x)) 
+    as.factor(x) 
+  else 
+    x
+})
+
+sapply(cleaned_data, class)
+cleaned_data
+
+studentperformance <- cleaned_data
+```
+
+```{r}
+#create new column for student progress
+studentperformance$Progress <- studentperformance$Exam_Score - studentperformance$Previous_Scores
+head(studentperformance, 5)
+```
+
+**BASED ON CORRELATION TEST OF CHISQUARE -- WE MIGHT NEED TO CHANGE ALPHA VALUE TO SOMETING DIFF IN ORDER TO MAKE SOME VARIABLES STATISTICALLY SIGNIFICANT; RN, NONE ARE HIGHLY CORRELATED** 
+
+```{r}
+#check if there is a correlation between extracurricular and family income using chisquare test 
+corr_extracurricular = data.frame(studentperformance$Family_Income, studentperformance$Extracurricular_Activities)
+
+corr_extracurricular = table(studentperformance$Family_Income, studentperformance$Extracurricular_Activities)
+
+print(corr_extracurricular)
+
+print(chisq.test(corr_extracurricular))
+```
+
+P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables.  
 
 
+```{r}
+#check if there is a correlation between acess to resources and family income using chisquare test 
+corr_resources = data.frame(studentperformance$Family_Income, studentperformance$Access_to_Resources)
+
+corr_resources = table(studentperformance$Family_Income, studentperformance$Access_to_Resources)
+
+print(corr_resources)
+
+print(chisq.test(corr_resources))
+```
+
+P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables.  
+
+```{r}
+#check if there is a correlation between study hours and family income using chisquare test
+corr_studyhours = data.frame(studentperformance$Family_Income, studentperformance$Hours_Studied)
+
+corr_studyhours = table(studentperformance$Family_Income, studentperformance$Hours_Studied)
+
+print(corr_studyhours)
+
+print(chisq.test(corr_studyhours))
+```
+
+P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables. **MIGHT NEED TO RUN ANOVA FOR CORRELATION HERE** 
+
+```{r}
+#check if there is a correlation between parental involvement and family income using chisquare test
+corr_involvement = data.frame(studentperformance$Family_Income, studentperformance$Parental_Involvement)
+
+corr_involvement = table(studentperformance$Family_Income, studentperformance$Parental_Involvement)
+
+print(corr_involvement)
+
+print(chisq.test(corr_involvement))
+```
+P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables.
+
+```{r}
+#check if there is a correlation between tutoring sessions and family income using chisquare test
+corr_tutoring = data.frame(studentperformance$Family_Income, studentperformance$Tutoring_Sessions)
+
+corr_tutoring  = table(studentperformance$Family_Income, studentperformance$Tutoring_Sessions)
+
+print(corr_tutoring)
+
+print(chisq.test(corr_tutoring))
+```
+
+P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables. **MIGHT NEED TO RUN ANOVA FOR CORRELATION HERE**
+
+```{r}
+#check if there is a correlation between school type and family income using chisquare test
+corr_schooltype = data.frame(studentperformance$Family_Income, studentperformance$School_Type)
+
+corr_schooltype  = table(studentperformance$Family_Income, studentperformance$School_Type)
+
+print(corr_schooltype)
+
+print(chisq.test(corr_schooltype))
+```
+
+P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables. 
+
+```{r}
+#check if there is a correlation between parental education level and family income using chisquare test
+corr_parenteducation = data.frame(studentperformance$Family_Income, studentperformance$Parental_Education_Level)
+
+corr_parenteducation = table(studentperformance$Family_Income, studentperformance$Parental_Education_Level)
+
+print(corr_parenteducation)
+
+print(chisq.test(corr_parenteducation))
+```
+
+P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables. 
