@@ -30,7 +30,7 @@ head(studentperformance, 5)
 
 #Karin: ANOVA 
 #Chenzi: Post-hoc ANOVA 
-#Eric: Interpretation of Visualizations / For loops for Anova Testing and visualization / Backward function for linear regression 
+#Eric: Interpretation of Visualizations / For loops for Anova Testing and visualization / Backward function for linear regression / All work is on Eric.rmd file 
 #Kashish: Visualization 
 
 #Family Income as correlated to other variables: 
