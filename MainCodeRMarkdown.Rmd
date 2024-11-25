@@ -14,6 +14,7 @@ if(!require(knitr)){
 if(!require(tidyverse)){
   install.packages("tidyverse")
   library(tidyverse)
+  library(dplyr)
 }
 
 if(!require(ggbeeswarm)){
@@ -26,6 +27,10 @@ if(!require(ggforce)){
   library(ggforce)
 }  
 
+if(!require(ggplot2)){
+ install.packages("ggplot2")
+  library(ggplot2)
+}  
 ```
 
 ```{r setup, include=FALSE}
@@ -40,7 +45,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #Kashish: Visualization 
 
 #Family Income as correlated to other variables: 
-#Variable: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, Family_Income, School_Type, Parental_Educational_Level 
+#Variable: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, School_Type, Parental_Educational_Level 
 
 ```{r}
 #read initial data
@@ -75,6 +80,167 @@ studentperformance <- cleaned_data
 #create new column for student progress
 studentperformance$Progress <- studentperformance$Exam_Score - studentperformance$Previous_Scores
 head(studentperformance, 5)
+```
+
+**VISUALIZATION OF OUR VARIABLES**
+```{r}
+#pie chart of extracurricular activities in relation to income levels
+
+#count responses for low income 
+low.income_counts_extracurriculars <- table(studentperformance$Extracurricular_Activities[studentperformance$Family_Income == "Low"])
+
+low.income_labels_extracurriculars <- names(low.income_counts_extracurriculars)
+
+pie(low.income_counts_extracurriculars, labels = low.income_labels_extracurriculars, main = "Responses for Low Income", col = c("red", "blue"))
+
+#count responses for medium income 
+medium.income_counts_extracurriculars <- table(studentperformance$Extracurricular_Activities[studentperformance$Family_Income == "Medium"])
+
+medium.income_labels_extracurriculars <- names(medium.income_counts_extracurriculars)
+
+pie(medium.income_counts_extracurriculars, labels = medium.income_labels_extracurriculars, main = "Responses for Medium Income", col = c("pink","lightblue"))
+
+#count income for high income
+high.income_counts_extracurriculars <- table(studentperformance$Extracurricular_Activities[studentperformance$Family_Income == "High"])
+
+high.income_labels_extracurriculars <- names(high.income_counts_extracurriculars)
+
+pie(high.income_counts_extracurriculars, labels = high.income_labels_extracurriculars, main = "Responses for High Income", col = c("magenta","navy"))
+```
+
+```{r}
+#pie chart of access to resources in relation to income levels
+
+#count responses for low income 
+low.income_counts_resources <- table(studentperformance$Access_to_Resources[studentperformance$Family_Income == "Low"])
+
+low.income_labels_resources <- names(low.income_counts_resources)
+
+pie(low.income_counts_resources, labels = low.income_labels_resources, main = "Responses for Low Income", col = c("red", "blue", "green"))
+
+#count responses for medium income 
+medium.income_counts_resources <- table(studentperformance$Access_to_Resources[studentperformance$Family_Income == "Medium"])
+
+medium.income_labels_resources <- names(medium.income_counts_resources)
+
+pie(medium.income_counts_resources, labels = medium.income_labels_resources, main = "Responses for Medium Income", col = c("pink","lightblue", "lightgreen"))
+
+#count income for high income
+high.income_counts_resources <- table(studentperformance$Access_to_Resources[studentperformance$Family_Income == "High"])
+
+high.income_labels_resources <- names(high.income_counts_resources)
+
+pie(high.income_counts_resources, labels = high.income_labels_resources, main = "Responses for High Income", col = c("magenta","navy", "forestgreen"))
+
+```
+
+```{r}
+#bar chart of hours studied in relation to income levels
+
+#create income levels as an ordered factor 
+studentperformance$Family_Income <- factor(studentperformance$Family_Income, levels = c("Low", "Medium", "High"))
+
+#aggregate the data
+hours.studied <- studentperformance %>% group_by(Family_Income) %>% summarise(Total = sum(Hours_Studied))
+
+#create bar chart
+ggplot(hours.studied, aes(x = Family_Income, y = Total, fill= Family_Income)) + geom_bar(stat = "identity") + scale_fill_manual(values = c("Low" = "red", "Medium" = "blue", "High" = "green")) + theme_minimal() + labs(
+  title = "Bar Chart of Hours Studied in Relation to Income Level",
+  x = "Family Income",
+  y = "Hours Studied"
+)
+```
+
+```{r}
+#pie chart of parental involvement in relation to income levels
+
+#count responses for low income 
+low.income_counts_involvement <- table(studentperformance$Parental_Involvement[studentperformance$Family_Income == "Low"])
+
+low.income_labels_involvement <- names(low.income_counts_involvement)
+
+pie(low.income_counts_involvement, labels = low.income_labels_involvement, main = "Responses for Low Income", col = c("red", "blue", "green"))
+
+#count responses for medium income 
+medium.income_counts_involvement <- table(studentperformance$Parental_Involvement[studentperformance$Family_Income == "Medium"])
+
+medium.income_labels_involvement <- names(medium.income_counts_involvement)
+
+pie(medium.income_counts_involvement, labels = medium.income_labels_involvement, main = "Responses for Medium Income", col = c("pink","lightblue", "lightgreen"))
+
+#count income for high income
+high.income_counts_involvement <- table(studentperformance$Parental_Involvement[studentperformance$Family_Income == "High"])
+
+high.income_labels_involvement <- names(high.income_counts_involvement)
+
+pie(high.income_counts_involvement, labels = high.income_labels_involvement, main = "Responses for High Income", col = c("magenta","navy", "forestgreen"))
+```
+
+```{r}
+#bar chart of tutoring sessions in relation to income levels
+
+#create income levels as an ordered factor 
+studentperformance$Family_Income <- factor(studentperformance$Family_Income, levels = c("Low", "Medium", "High"))
+
+#aggregate the data
+tutoring.sessions <- studentperformance %>% group_by(Family_Income) %>% summarise(Total_Sessions = sum(Tutoring_Sessions))
+
+#create bar chart
+ggplot(tutoring.sessions, aes(x = Family_Income, y = Total_Sessions, fill= Family_Income)) + geom_bar(stat = "identity") + scale_fill_manual(values = c("Low" = "red", "Medium" = "blue", "High" = "green")) + theme_minimal() + labs(
+  title = "Bar Chart of Tutoring Sessions in Relation to Income Level",
+  x = "Family Income",
+  y = "Tutoring Sessions"
+)
+```
+
+```{r}
+#pie chart of school type in relation to income levels
+
+#count responses for low income 
+low.income_counts_school <- table(studentperformance$School_Type[studentperformance$Family_Income == "Low"])
+
+low.income_labels_school <- names(low.income_counts_school)
+
+pie(low.income_counts_school, labels = low.income_labels_school, main = "Responses for Low Income", col = c("red", "blue", "green"))
+
+#count responses for medium income 
+medium.income_counts_school <- table(studentperformance$School_Type[studentperformance$Family_Income == "Medium"])
+
+medium.income_labels_school <- names(medium.income_counts_school)
+
+pie(medium.income_counts_school, labels = medium.income_labels_school, main = "Responses for Medium Income", col = c("pink","lightblue", "lightgreen"))
+
+#count income for high income
+high.income_counts_school <- table(studentperformance$School_Type[studentperformance$Family_Income == "High"])
+
+high.income_labels_school <- names(high.income_counts_school)
+
+pie(high.income_counts_school, labels = high.income_labels_school, main = "Responses for High Income", col = c("magenta","navy", "forestgreen"))
+```
+
+```{r}
+#pie chart of parental educational level in relation to income levels
+
+#count responses for low income 
+low.income_counts_educational_level <- table(studentperformance$Parental_Education_Level[studentperformance$Family_Income == "Low"])
+
+low.income_labels_educational_level <- names(low.income_counts_educational_level)
+
+pie(low.income_counts_educational_level, labels = low.income_labels_educational_level, main = "Responses for Low Income", col = c("red", "blue", "green"))
+
+#count responses for medium income 
+medium.income_counts_educational_level <- table(studentperformance$Parental_Education_Level[studentperformance$Family_Income == "Medium"])
+
+medium.income_labels_educational_level <- names(medium.income_counts_educational_level)
+
+pie(medium.income_counts_educational_level, labels = medium.income_labels_educational_level, main = "Responses for Medium Income", col = c("pink","lightblue", "lightgreen"))
+
+#count income for high income
+high.income_counts_educational_level <- table(studentperformance$Parental_Education_Level[studentperformance$Family_Income == "High"])
+
+high.income_labels_educational_level <- names(high.income_counts_educational_level)
+
+pie(high.income_counts_educational_level, labels = high.income_labels_educational_level, main = "Responses for High Income", col = c("magenta","navy", "forestgreen"))
 ```
 
 **BASED ON CORRELATION TEST OF CHISQUARE -- WE MIGHT NEED TO CHANGE ALPHA VALUE TO SOMETING DIFF IN ORDER TO MAKE SOME VARIABLES STATISTICALLY SIGNIFICANT; RN, NONE ARE HIGHLY CORRELATED** 
@@ -169,3 +335,4 @@ print(chisq.test(corr_parenteducation))
 ```
 
 P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables. 
+
