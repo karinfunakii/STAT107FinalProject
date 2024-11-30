@@ -47,22 +47,25 @@ knitr::opts_chunk$set(echo = TRUE)
 #Family Income as correlated to other variables: 
 #Variable: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, School_Type, Parental_Educational_Level 
 
+**INITIAL DATA CLEAN + SET UP**
 ```{r}
-#read initial data
+# read initial data
 studentperformance.initial <- read.csv("StudentPerformanceFactors.csv")
 head(studentperformance.initial)
 ```
 
 ```{r}
-#clean data
+# clean data
 cleaned_data <- na.omit(studentperformance.initial)
 if (nrow(cleaned_data) == 0) {
   stop("All rows contain missing values. Cannot proceed with model.")
 }
+str(cleaned_data)
+head(cleaned_data)
 ```
 
 ```{r}
-#change the class type of all categorical variables to factor levels so they could be seen as categories when analyzing using r. continuous variables being the integer type is good
+# change the class type of all categorical variables to factor levels so they could be seen as categories when analyzing using r. continuous variables being the integer type is good
 cleaned_data[] <- lapply(cleaned_data, function(x) {
   if (is.character(x)) 
     as.factor(x) 
@@ -77,262 +80,180 @@ studentperformance <- cleaned_data
 ```
 
 ```{r}
-#create new column for student progress
+# create new column for student progress
 studentperformance$Progress <- studentperformance$Exam_Score - studentperformance$Previous_Scores
 head(studentperformance, 5)
 ```
 
-**VISUALIZATION OF OUR VARIABLES**
+**AVERAGES OF OUR NUMERICAL VARIABLES**
 ```{r}
-#pie chart of extracurricular activities in relation to income levels
+#see what kind of variables Hours_Studied and Tutoring Sessions Are 
+class(studentperformance$Hours_Studied)
 
-#count responses for low income 
-low.income_counts_extracurriculars <- table(studentperformance$Extracurricular_Activities[studentperformance$Family_Income == "Low"])
+class(studentperformance$Tutoring_Sessions)
 
-low.income_labels_extracurriculars <- names(low.income_counts_extracurriculars)
+#since these are factor variables: calculate the mode and frequency distribution
 
-pie(low.income_counts_extracurriculars, labels = low.income_labels_extracurriculars, main = "Responses for Low Income", col = c("red", "blue"))
+# list of factor variables to calculate statistics for
+factor.interest.variables <- c("Hours_Studied", "Tutoring_Sessions")
 
-#count responses for medium income 
-medium.income_counts_extracurriculars <- table(studentperformance$Extracurricular_Activities[studentperformance$Family_Income == "Medium"])
+# calculate mode
+# define a function for mode calculation
+mode <- function(x) {
+  uniq_x <- unique(x)
+  uniq_x[which.max(tabulate(match(x, uniq_x)))]  # Return the most frequent value
+}
 
-medium.income_labels_extracurriculars <- names(medium.income_counts_extracurriculars)
+#loop through each factor variable and calculate the mode
+for (var in factor.interest.variables) {
+  mode_value <- mode(studentperformance[[var]])
+  
+# print the results
+  cat("Mode for", var, ":", mode_value, "\n")
+}
 
-pie(medium.income_counts_extracurriculars, labels = medium.income_labels_extracurriculars, main = "Responses for Medium Income", col = c("pink","lightblue"))
+#calculate frequency distribution
+#loop through each factor variable and calculate the frequency distribution
+for (var in factor.interest.variables) {
+  freq_table <- table(studentperformance[[var]])
 
-#count income for high income
-high.income_counts_extracurriculars <- table(studentperformance$Extracurricular_Activities[studentperformance$Family_Income == "High"])
-
-high.income_labels_extracurriculars <- names(high.income_counts_extracurriculars)
-
-pie(high.income_counts_extracurriculars, labels = high.income_labels_extracurriculars, main = "Responses for High Income", col = c("magenta","navy"))
-```
-
-```{r}
-#pie chart of access to resources in relation to income levels
-
-#count responses for low income 
-low.income_counts_resources <- table(studentperformance$Access_to_Resources[studentperformance$Family_Income == "Low"])
-
-low.income_labels_resources <- names(low.income_counts_resources)
-
-pie(low.income_counts_resources, labels = low.income_labels_resources, main = "Responses for Low Income", col = c("red", "blue", "green"))
-
-#count responses for medium income 
-medium.income_counts_resources <- table(studentperformance$Access_to_Resources[studentperformance$Family_Income == "Medium"])
-
-medium.income_labels_resources <- names(medium.income_counts_resources)
-
-pie(medium.income_counts_resources, labels = medium.income_labels_resources, main = "Responses for Medium Income", col = c("pink","lightblue", "lightgreen"))
-
-#count income for high income
-high.income_counts_resources <- table(studentperformance$Access_to_Resources[studentperformance$Family_Income == "High"])
-
-high.income_labels_resources <- names(high.income_counts_resources)
-
-pie(high.income_counts_resources, labels = high.income_labels_resources, main = "Responses for High Income", col = c("magenta","navy", "forestgreen"))
+# print the frequency table
+  cat("Frequency distribution for", var, ":\n")
+  print(freq_table)
+  cat("---------------------------------\n")
+}
 
 ```
 
+ATTACH ANALYSIS HERE 
+
+**VISUALIZATION OF OUR CHOSEN VARIABLES**
 ```{r}
-#bar chart of hours studied in relation to income levels
+# barplot visualization of variables of interest: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, School_Type, Parental_Educational_Level 
 
-#create income levels as an ordered factor 
-studentperformance$Family_Income <- factor(studentperformance$Family_Income, levels = c("Low", "Medium", "High"))
+#create the interest variables that we need to graph
+interest.variables <- c("Extracurricular_Activities", "Access_to_Resources", "Hours_Studied", 
+               "Parental_Involvement", "Tutoring_Sessions", "School_Type", 
+               "Parental_Education_Level")
 
-#aggregate the data
-hours.studied <- studentperformance %>% group_by(Family_Income) %>% summarise(Total = sum(Hours_Studied))
-
-#create bar chart
-ggplot(hours.studied, aes(x = Family_Income, y = Total, fill= Family_Income)) + geom_bar(stat = "identity") + scale_fill_manual(values = c("Low" = "red", "Medium" = "blue", "High" = "green")) + theme_minimal() + labs(
-  title = "Bar Chart of Hours Studied in Relation to Income Level",
-  x = "Family Income",
-  y = "Hours Studied"
-)
+# loop through each variable and create a bar chart
+for (var in interest.variables) {
+  barplot <- ggplot(studentperformance, aes(x = !!sym(var), fill = Family_Income)) +
+    geom_bar(position = "dodge") +
+    labs(title = paste("Distribution of", var, "by Family Income"),
+         x = var, 
+         y = "Count") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+# print the plot
+  print(barplot)
+}
 ```
 
-```{r}
-#pie chart of parental involvement in relation to income levels
-
-#count responses for low income 
-low.income_counts_involvement <- table(studentperformance$Parental_Involvement[studentperformance$Family_Income == "Low"])
-
-low.income_labels_involvement <- names(low.income_counts_involvement)
-
-pie(low.income_counts_involvement, labels = low.income_labels_involvement, main = "Responses for Low Income", col = c("red", "blue", "green"))
-
-#count responses for medium income 
-medium.income_counts_involvement <- table(studentperformance$Parental_Involvement[studentperformance$Family_Income == "Medium"])
-
-medium.income_labels_involvement <- names(medium.income_counts_involvement)
-
-pie(medium.income_counts_involvement, labels = medium.income_labels_involvement, main = "Responses for Medium Income", col = c("pink","lightblue", "lightgreen"))
-
-#count income for high income
-high.income_counts_involvement <- table(studentperformance$Parental_Involvement[studentperformance$Family_Income == "High"])
-
-high.income_labels_involvement <- names(high.income_counts_involvement)
-
-pie(high.income_counts_involvement, labels = high.income_labels_involvement, main = "Responses for High Income", col = c("magenta","navy", "forestgreen"))
-```
+ATTACH ANALYSIS HERE 
 
 ```{r}
-#bar chart of tutoring sessions in relation to income levels
+#mosaic chart visualization of our (5) categorical variables of interest: Extracurrciular_Activities, Access_to_Resources, Parental_Involvement, School_Type, Parental_Educational_Level 
 
-#create income levels as an ordered factor 
-studentperformance$Family_Income <- factor(studentperformance$Family_Income, levels = c("Low", "Medium", "High"))
+# create a new set of variables for just categorical ones we are testing 
+cat.interest.variables <-  c("Extracurricular_Activities", "Access_to_Resources",
+               "Parental_Involvement", "School_Type", "Parental_Education_Level")
 
-#aggregate the data
-tutoring.sessions <- studentperformance %>% group_by(Family_Income) %>% summarise(Total_Sessions = sum(Tutoring_Sessions))
+#install package to be able to plot a mosaic plot 
+if(!require(ggmosaic)){
+    install.packages("ggmosaic", repos = "https://cran.r-project.org")
+    library(ggmosaic)
+}
 
-#create bar chart
-ggplot(tutoring.sessions, aes(x = Family_Income, y = Total_Sessions, fill= Family_Income)) + geom_bar(stat = "identity") + scale_fill_manual(values = c("Low" = "red", "Medium" = "blue", "High" = "green")) + theme_minimal() + labs(
-  title = "Bar Chart of Tutoring Sessions in Relation to Income Level",
-  x = "Family Income",
-  y = "Tutoring Sessions"
-)
+#change to as factor 
+studentperformance$Family_Income <- as.factor(studentperformance$Family_Income)
+studentperformance[[var]] <- as.factor(studentperformance[[var]])
+
+# loop through each variable and create a mosaic plot
+for (var in cat.interest.variables) {
+  mosaic.plot <- ggplot(studentperformance) +
+    geom_mosaic(aes(weight = 1, x = product(Family_Income), fill = !!sym(var)), na.rm = TRUE) +
+    labs(title = paste("Mosaic Plot of", var, "by Family Income"),
+         x = "Family Income",
+         y = "Proportion",
+         fill = var) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  # Print the plot
+  print(mosaic.plot)
+}
 ```
+
+ATTACH ANALYSIS HERE 
 
 ```{r}
-#pie chart of school type in relation to income levels
+#spineplot chart visualization of our (2) factor variables of interest: Hours_Studied and Tutoring Sessions
 
-#count responses for low income 
-low.income_counts_school <- table(studentperformance$School_Type[studentperformance$Family_Income == "Low"])
-
-low.income_labels_school <- names(low.income_counts_school)
-
-pie(low.income_counts_school, labels = low.income_labels_school, main = "Responses for Low Income", col = c("red", "blue", "green"))
-
-#count responses for medium income 
-medium.income_counts_school <- table(studentperformance$School_Type[studentperformance$Family_Income == "Medium"])
-
-medium.income_labels_school <- names(medium.income_counts_school)
-
-pie(medium.income_counts_school, labels = medium.income_labels_school, main = "Responses for Medium Income", col = c("pink","lightblue", "lightgreen"))
-
-#count income for high income
-high.income_counts_school <- table(studentperformance$School_Type[studentperformance$Family_Income == "High"])
-
-high.income_labels_school <- names(high.income_counts_school)
-
-pie(high.income_counts_school, labels = high.income_labels_school, main = "Responses for High Income", col = c("magenta","navy", "forestgreen"))
+# loop through each variable and create a spineplot
+for (var in factor.interest.variables) {
+  spineplot <- ggplot(studentperformance, aes(x = !!sym(var), fill = Family_Income)) +
+    geom_bar(position = "fill", width = 0.7) +
+    labs(title = paste("Spineplot of", var, "by Family Income"),
+         x = var,
+         y = "Proportion",
+         fill = "Family Income") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  # Print the plot
+  print(spineplot)
+}
 ```
+
+ATTACH ANALYSIS HERE 
+
+**CORRELATION TEST OF CHISQUARE -- WE MIGHT NEED TO CHANGE ALPHA VALUE TO SOMETING DIFF IN ORDER TO MAKE SOME VARIABLES STATISTICALLY SIGNIFICANT; RN, NONE ARE HIGHLY CORRELATED** 
+```{r}
+#check for assumptions for chi-square
+
+# loop through each variable to check assumptions
+for (var in cat.interest.variables) {
+  # Create a contingency table
+  contingency_table <- table(studentperformance[[var]], studentperformance$Family_Income)
+  
+  # Check independence assumption (cannot directly test but mention it's assumed)
+  cat("Checking assumptions for", var, "vs Family_Income:\n")
+  cat("Independence of observations: Assumed based on data collection.\n")
+  
+  # Calculate expected frequencies
+  expected_freq <- chisq.test(contingency_table)$expected
+  
+  # Check if all expected frequencies are >= 5
+  if (all(expected_freq >= 5)) {
+    cat("All expected frequencies are >= 5. The Chi-Square test assumption is met.\n")
+  } else {
+    cat("Warning: Some expected frequencies are < 5. The Chi-Square test assumption is violated.\n")
+    cat("Expected frequencies:\n")
+    print(expected_freq)
+  }
+  
+  cat("\n-------------------------------------------\n")
+}
+```
+
+All assumptions for the Chi-Square Test have been met to run for categorical interest variables. 
 
 ```{r}
-#pie chart of parental educational level in relation to income levels
+#chi-square analysis of our categorical variables of interest: Extracurricular_Activities, Access_to_Resources, Parental_Involvement, School_Type, Parental_Educational_Level 
+  
+# loop through each variable and run the Chi-Square test
+for (var in cat.interest.variables) {
+  contingency_table <- table(studentperformance[[var]], studentperformance$Family_Income)
+  chi_test <- chisq.test(contingency_table)
+  
+# display the results
+  cat("Chi-Square Test for", var, "vs Family_Income:\n")
+  print(chi_test)
+  cat("\n-------------------------------------------\n")
+}
 
-#count responses for low income 
-low.income_counts_educational_level <- table(studentperformance$Parental_Education_Level[studentperformance$Family_Income == "Low"])
-
-low.income_labels_educational_level <- names(low.income_counts_educational_level)
-
-pie(low.income_counts_educational_level, labels = low.income_labels_educational_level, main = "Responses for Low Income", col = c("red", "blue", "green"))
-
-#count responses for medium income 
-medium.income_counts_educational_level <- table(studentperformance$Parental_Education_Level[studentperformance$Family_Income == "Medium"])
-
-medium.income_labels_educational_level <- names(medium.income_counts_educational_level)
-
-pie(medium.income_counts_educational_level, labels = medium.income_labels_educational_level, main = "Responses for Medium Income", col = c("pink","lightblue", "lightgreen"))
-
-#count income for high income
-high.income_counts_educational_level <- table(studentperformance$Parental_Education_Level[studentperformance$Family_Income == "High"])
-
-high.income_labels_educational_level <- names(high.income_counts_educational_level)
-
-pie(high.income_counts_educational_level, labels = high.income_labels_educational_level, main = "Responses for High Income", col = c("magenta","navy", "forestgreen"))
 ```
 
-**BASED ON CORRELATION TEST OF CHISQUARE -- WE MIGHT NEED TO CHANGE ALPHA VALUE TO SOMETING DIFF IN ORDER TO MAKE SOME VARIABLES STATISTICALLY SIGNIFICANT; RN, NONE ARE HIGHLY CORRELATED** 
-
-```{r}
-#check if there is a correlation between extracurricular and family income using chisquare test 
-corr_extracurricular = data.frame(studentperformance$Family_Income, studentperformance$Extracurricular_Activities)
-
-corr_extracurricular = table(studentperformance$Family_Income, studentperformance$Extracurricular_Activities)
-
-print(corr_extracurricular)
-
-print(chisq.test(corr_extracurricular))
-```
-
-P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables.  
-
-
-```{r}
-#check if there is a correlation between acess to resources and family income using chisquare test 
-corr_resources = data.frame(studentperformance$Family_Income, studentperformance$Access_to_Resources)
-
-corr_resources = table(studentperformance$Family_Income, studentperformance$Access_to_Resources)
-
-print(corr_resources)
-
-print(chisq.test(corr_resources))
-```
-
-P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables.  
-
-```{r}
-#check if there is a correlation between study hours and family income using chisquare test
-corr_studyhours = data.frame(studentperformance$Family_Income, studentperformance$Hours_Studied)
-
-corr_studyhours = table(studentperformance$Family_Income, studentperformance$Hours_Studied)
-
-print(corr_studyhours)
-
-print(chisq.test(corr_studyhours))
-```
-
-P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables. **MIGHT NEED TO RUN ANOVA FOR CORRELATION HERE** 
-
-```{r}
-#check if there is a correlation between parental involvement and family income using chisquare test
-corr_involvement = data.frame(studentperformance$Family_Income, studentperformance$Parental_Involvement)
-
-corr_involvement = table(studentperformance$Family_Income, studentperformance$Parental_Involvement)
-
-print(corr_involvement)
-
-print(chisq.test(corr_involvement))
-```
-P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables.
-
-```{r}
-#check if there is a correlation between tutoring sessions and family income using chisquare test
-corr_tutoring = data.frame(studentperformance$Family_Income, studentperformance$Tutoring_Sessions)
-
-corr_tutoring  = table(studentperformance$Family_Income, studentperformance$Tutoring_Sessions)
-
-print(corr_tutoring)
-
-print(chisq.test(corr_tutoring))
-```
-
-P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables. **MIGHT NEED TO RUN ANOVA FOR CORRELATION HERE**
-
-```{r}
-#check if there is a correlation between school type and family income using chisquare test
-corr_schooltype = data.frame(studentperformance$Family_Income, studentperformance$School_Type)
-
-corr_schooltype  = table(studentperformance$Family_Income, studentperformance$School_Type)
-
-print(corr_schooltype)
-
-print(chisq.test(corr_schooltype))
-```
-
-P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables. 
-
-```{r}
-#check if there is a correlation between parental education level and family income using chisquare test
-corr_parenteducation = data.frame(studentperformance$Family_Income, studentperformance$Parental_Education_Level)
-
-corr_parenteducation = table(studentperformance$Family_Income, studentperformance$Parental_Education_Level)
-
-print(corr_parenteducation)
-
-print(chisq.test(corr_parenteducation))
-```
-
-P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables. 
-
+For all variables: P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables.  
