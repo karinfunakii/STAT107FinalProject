@@ -289,3 +289,116 @@ boxplot(Exam_Score ~ Family_Income, data = data,
         col = "lightblue")
 ```
 
+
+ANOVA tests:
+
+First, we will perform an ANOVA test for family income on progress since family income is the main variable we are interested in.
+```{r}
+# The conditions for ANOVA are independence, normality, and homoskedasticity. We will assume that there is independence between and within family income groups, because it's not likely that one family's income is impacted by another family's income.
+
+# mean, standard deviation, number of observations, and progress for each family income group
+studentperformance %>%
+  group_by(Family_Income) %>%
+  summarize(
+    Mean = mean(Progress),
+    SD = sd(Progress),
+    n = n(),
+    SE = sd(Progress) / sqrt(n())
+  )
+
+# histogram
+studentperformance %>%
+  ggplot(aes(x = Progress)) +
+  geom_histogram(aes(fill = Family_Income)) +
+  facet_grid(cols = vars(Family_Income))
+
+# boxplot
+studentperformance %>%
+  ggplot(aes(x = Family_Income, y = Progress)) +
+  geom_boxplot(aes(fill = Family_Income)) +
+  labs(
+    x = "Family Income",
+    y = "Progress"
+  )
+```
+Although the boxplots show that there is one outlier for the medium family income group, we will not remove this since it's not as extreme to the point that it changes the variability of data drastically and is unlikely that it's caused by a measurement error. Overall, data from all family income groups seem to be nearly normal and the variability across those groups seem to be not significantly different, meeting the conditions for an ANOVA test.
+
+```{r}
+family_income_fit <- lm(Progress ~ Family_Income, data = studentperformance)
+anova(family_income_fit)
+```
+There is some significance in the difference of exam score progress between family income groups.
+
+Next, we will perform ANOVA tests for all categorical variables we tested above. We will assume independence for all variables since it's most likely that a student's home environment is not influenced by other students' home environments.
+```{r}
+for (var in cat.interest.variables){
+  studentperformance %>%
+    group_by(!!sym(var)) %>% # sym() makes a string into a symbol, !! unquotes
+    summarize(
+      Mean = mean(Progress),
+      SD = sd(Progress),
+      n = n(),
+      SE = sd(Progress) / sqrt(n())
+    ) %>%
+    print()
+  
+  hist <- studentperformance %>%
+    ggplot(aes(x = Progress)) +
+    geom_histogram(aes(fill = !!sym(var))) +
+    facet_grid(cols = vars(!!sym(var)))
+  
+  print(hist)
+  
+  
+  bp <- studentperformance %>%
+    ggplot(aes(x = var, y = Progress)) +
+    geom_boxplot(aes(fill = !!sym(var))) +
+    labs(
+      x = var,
+      y = "Progress"
+    )
+    
+  print(bp)
+}
+```
+All variables have outliers shown on the boxplots, but we will keep them for analysis since they are not too extreme to change their variabilities drastically. All of them look nearly normal with similar variabilities except for Parental_Education_Level.*
+
+```{r}
+anova_valid_cat_var <- c("Extracurricular_Activities", "Access_to_Resources",
+               "Parental_Involvement", "School_Type")
+
+for (var in anova_valid_cat_var){
+  formula <- as.formula(paste("Progress ~", var))
+  var_fit <- lm(formula, data = studentperformance)
+  var_anova <- anova(var_fit)
+  print(var_anova)
+}
+```
+Only Parental_Involvement showed that there wa a significant difference in progress between the groups. 
+
+Simple Linear Regression:
+```{r}
+# scatter plots
+for (var in factor.interest.variables){
+  scatter <- ggplot(data = studentperformance) +
+    geom_point(aes(x = !!sym(var), y = Progress))
+  print(scatter)
+}
+
+model_hours <- lm(Progress ~ Hours_Studied, data = studentperformance)
+summary(model_hours)
+
+ggplot(data = studentperformance) +
+  geom_point(aes(x = Hours_Studied, y = Progress)) +
+  geom_line(
+    data = fortify(model_hours),
+    aes(x = Hours_Studied, y = .fitted),
+    color = "red"
+  )
+```
+Looking at the scatter plots, there does not seem to be a linear trend between the number of tutoring sessions and progress in exam scores. However, there seems to be a slight linear trend between hours studied and progress, so we performed a simple linear regression for only this variable. The significance was high, and the best fit ine is represented as a red line on the last scatter plot.
+
+
+
+
+
