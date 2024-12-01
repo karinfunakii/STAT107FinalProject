@@ -256,4 +256,36 @@ for (var in cat.interest.variables) {
 
 ```
 
-For all variables: P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables.  
+For all variables: P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables.
+
+ANOVA TEst coding
+```{r}
+if(!require(tidyverse)) install.packages("tidyverse")
+if(!require(car)) install.packages("car")
+
+library(tidyverse)
+library(car)
+
+# Load the dataset
+data <- read.csv("StudentPerformanceFactors.csv")
+
+# Perform one-way ANOVA
+anova_model <- aov(Exam_Score ~ Family_Income, data = data)
+
+# Display the summary of the ANOVA
+summary(anova_model)
+
+# Conduct Tukey's Honest Significant Difference (HSD) test for post-hoc analysis
+tukey_result <- TukeyHSD(anova_model)
+
+# Display the Tukey test results
+print(tukey_result)
+
+# Optional: Visualization of the results
+boxplot(Exam_Score ~ Family_Income, data = data,
+        main = "Exam Score by Family Income",
+        xlab = "Family Income Level",
+        ylab = "Exam Score",
+        col = "lightblue")
+```
+
