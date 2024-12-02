@@ -1,7 +1,7 @@
 ---
 title: "MainCodeRMarkdown"
-author: ""
-date: "Change to due date"
+author: "Kashish Rai, Karin Funaki, Chenzi --, Eric -- "
+date: "December 11, 2024"
 output: html_document
 ---
 
@@ -31,41 +31,81 @@ if(!require(ggplot2)){
  install.packages("ggplot2")
   library(ggplot2)
 }  
+
+if(!require(naniar)){
+ install.packages("naniar")
+  library(naniar)
+}  
+
+if(!require(dplyr)){
+ install.packages("dplyr")
+  library(dplyr)
+}  
 ```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#Question: Does family income affect the average educational progress? 
+#Question: Does family income affect the average educational progress?
 
-#Karin: ANOVA 
-#Chenzi: Post-hoc ANOVA 
-#Eric: Interpretation of Visualizations / For loops for Anova Testing and visualization / Backward function for linear regression / All work is on Eric.rmd file 
-#Kashish: Visualization 
+#Karin: ANOVA #Chenzi: Post-hoc ANOVA #Eric: Interpretation of Visualizations / For loops for Anova Testing and visualization / Backward function for linear regression / All work is on Eric.rmd file #Kashish: Visualization
 
-#Family Income as correlated to other variables: 
-#Variable: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, School_Type, Parental_Educational_Level 
+#Family Income as correlated to other variables: #Variable: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, School_Type, Parental_Educational_Level,
 
-**INITIAL DATA CLEAN + SET UP**
+**Initial Data Clean + Set-Up**
+
 ```{r}
 # read initial data
 studentperformance.initial <- read.csv("StudentPerformanceFactors.csv")
 head(studentperformance.initial)
+
+studentperformance.initial
 ```
 
 ```{r}
 # clean data
-cleaned_data <- na.omit(studentperformance.initial)
+# check if there are any NA values 
+sum(is.na(studentperformance.initial))
+sum(complete.cases(studentperformance.initial))
+
+#still -- saw some values that were blank, so defined them
+common_na_strings <- c("", " ", "NA", "N/A", "-", "null", "NULL")
+
+#applied this string to the entire data set
+studentperformance.initial %>%
+  miss_scan_count(search = common_na_strings)
+
+#replace all identified values with NA to make cleaning easier
+studentperformance.cleaned <- studentperformance.initial %>%
+  replace_with_na(replace = list(common_na_strings
+  ))
+
+# replace blanks across all columns
+studentperformance.na <- studentperformance.initial %>%
+  mutate(across(everything(), ~ ifelse(trimws(.) == "", NA, .)))
+
+# display all NA blanks in table
+table(is.na(studentperformance.na))
+
+# make sure the NA replacement worked by looking at new data frame
+studentperformance.na
+
+#omit all NA values from the data 
+cleaned_data <- na.omit(studentperformance.na)
 if (nrow(cleaned_data) == 0) {
   stop("All rows contain missing values. Cannot proceed with model.")
 }
+
+#neatly organize and display cleaned data
 str(cleaned_data)
 head(cleaned_data)
+
+cleaned_data
 ```
 
 ```{r}
-# change the class type of all categorical variables to factor levels so they could be seen as categories when analyzing using r. continuous variables being the integer type is good
+# change the class type of all categorical variables to factor levels so they could be seen as categories when analyzing using r. continuous variables being the integer type is good, so it was kept the same
 cleaned_data[] <- lapply(cleaned_data, function(x) {
   if (is.character(x)) 
     as.factor(x) 
@@ -85,27 +125,44 @@ studentperformance$Progress <- studentperformance$Exam_Score - studentperformanc
 head(studentperformance, 5)
 ```
 
-**AVERAGES OF OUR NUMERICAL VARIABLES**
+**Averages of Numerical Variables**
+
 ```{r}
 #see what kind of variables Hours_Studied and Tutoring Sessions Are 
 class(studentperformance$Hours_Studied)
 
 class(studentperformance$Tutoring_Sessions)
 
-#since these are factor variables: calculate the mode and frequency distribution
+#since these are integer variables: calculate the mean, median, mode and frequency distribution
 
 # list of factor variables to calculate statistics for
-factor.interest.variables <- c("Hours_Studied", "Tutoring_Sessions")
+integer.interest.variables <- c("Hours_Studied", "Tutoring_Sessions")
+
+#loop through each integer variable and calculate the mean
+for (var in integer.interest.variables) {
+  mean_value <- mean(studentperformance[[var]])
+  
+# print the results
+  cat("Mean for", var, ":", mean_value, "\n")
+}
+
+#loop through each interest variable and calculate the median
+for (var in integer.interest.variables) {
+  median_value <- median(studentperformance[[var]])
+  
+# print the results
+  cat("Median for", var, ":", median_value, "\n")
+}
 
 # calculate mode
 # define a function for mode calculation
 mode <- function(x) {
   uniq_x <- unique(x)
-  uniq_x[which.max(tabulate(match(x, uniq_x)))]  # Return the most frequent value
+  uniq_x[which.max(tabulate(match(x, uniq_x)))]  # return the most frequent value
 }
 
 #loop through each factor variable and calculate the mode
-for (var in factor.interest.variables) {
+for (var in integer.interest.variables) {
   mode_value <- mode(studentperformance[[var]])
   
 # print the results
@@ -114,7 +171,7 @@ for (var in factor.interest.variables) {
 
 #calculate frequency distribution
 #loop through each factor variable and calculate the frequency distribution
-for (var in factor.interest.variables) {
+for (var in integer.interest.variables) {
   freq_table <- table(studentperformance[[var]])
 
 # print the frequency table
@@ -125,9 +182,10 @@ for (var in factor.interest.variables) {
 
 ```
 
-ATTACH ANALYSIS HERE 
+ATTACH ANALYSIS HERE
 
-**VISUALIZATION OF OUR CHOSEN VARIABLES**
+**Visualization**
+
 ```{r}
 # barplot visualization of variables of interest: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, School_Type, Parental_Educational_Level 
 
@@ -151,7 +209,7 @@ for (var in interest.variables) {
 }
 ```
 
-ATTACH ANALYSIS HERE 
+ATTACH ANALYSIS HERE
 
 ```{r}
 #mosaic chart visualization of our (5) categorical variables of interest: Extracurrciular_Activities, Access_to_Resources, Parental_Involvement, School_Type, Parental_Educational_Level 
@@ -181,35 +239,40 @@ for (var in cat.interest.variables) {
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
   
-  # Print the plot
+# print the plot
   print(mosaic.plot)
 }
 ```
 
-ATTACH ANALYSIS HERE 
+ATTACH ANALYSIS HERE
 
 ```{r}
-#spineplot chart visualization of our (2) factor variables of interest: Hours_Studied and Tutoring Sessions
+#boxplot chart visualization of our (2) integer variables of interest: Hours_Studied and Tutoring Sessions
 
-# loop through each variable and create a spineplot
-for (var in factor.interest.variables) {
-  spineplot <- ggplot(studentperformance, aes(x = !!sym(var), fill = Family_Income)) +
-    geom_bar(position = "fill", width = 0.7) +
-    labs(title = paste("Spineplot of", var, "by Family Income"),
-         x = var,
-         y = "Proportion",
-         fill = "Family Income") +
+#identify variables of interest
+integer.interest.variables 
+x_variable <- "Family_Income"
+
+# loop through each variable of interest to create boxplots
+for (var in integer.interest.variables) {
+  plot <- ggplot(studentperformance, aes(x = .data[[x_variable]], y = .data[[var]])) +
+    geom_boxplot(fill = "skyblue", color = "darkblue", outlier.color = "red") +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    labs(title = paste(var, "vs", x_variable),
+         x = x_variable,
+         y = var) +
+    theme(plot.title = element_text(hjust = 0.5, size = 14),
+          axis.title = element_text(size = 12))
   
-  # Print the plot
-  print(spineplot)
+# print the plot
+  print(plot)
 }
 ```
 
-ATTACH ANALYSIS HERE 
+ATTACH ANALYSIS HERE
 
-**CORRELATION TEST OF CHISQUARE -- WE MIGHT NEED TO CHANGE ALPHA VALUE TO SOMETING DIFF IN ORDER TO MAKE SOME VARIABLES STATISTICALLY SIGNIFICANT; RN, NONE ARE HIGHLY CORRELATED** 
+**Chi-Square Test**
+
 ```{r}
 #check for assumptions for chi-square
 
@@ -238,7 +301,7 @@ for (var in cat.interest.variables) {
 }
 ```
 
-All assumptions for the Chi-Square Test have been met to run for categorical interest variables. 
+All assumptions for the Chi-Square Test have been met to run for categorical interest variables.
 
 ```{r}
 #chi-square analysis of our categorical variables of interest: Extracurricular_Activities, Access_to_Resources, Parental_Involvement, School_Type, Parental_Educational_Level 
@@ -256,9 +319,10 @@ for (var in cat.interest.variables) {
 
 ```
 
-For all variables: P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables.
+For all variables: P-value of this chi-square test for the categorical variables looks to be larger than 0.05 -- this means that there is weak correlation between the variables and family income. 
 
-ANOVA TEst coding
+**ANOVA Test**
+
 ```{r}
 if(!require(tidyverse)) install.packages("tidyverse")
 if(!require(car)) install.packages("car")
@@ -266,11 +330,8 @@ if(!require(car)) install.packages("car")
 library(tidyverse)
 library(car)
 
-# Load the dataset
-data <- read.csv("StudentPerformanceFactors.csv")
-
 # Perform one-way ANOVA
-anova_model <- aov(Exam_Score ~ Family_Income, data = data)
+anova_model <- aov(Exam_Score ~ Family_Income, data = studentperformance)
 
 # Display the summary of the ANOVA
 summary(anova_model)
@@ -288,4 +349,3 @@ boxplot(Exam_Score ~ Family_Income, data = data,
         ylab = "Exam Score",
         col = "lightblue")
 ```
-
