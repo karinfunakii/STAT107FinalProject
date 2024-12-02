@@ -651,7 +651,7 @@ x_variable <- "Family_Income"
 
 # loop through each variable of interest to create boxplots
 for (var in integer.interest.variables) {
-  plot <- ggplot(studentperformance, aes(x = .data[[x_variable]], y = .data[[var]])) +
+  boxplot <- ggplot(studentperformance, aes(x = .data[[x_variable]], y = .data[[var]])) +
     geom_boxplot(fill = "skyblue", color = "darkblue", outlier.color = "red") +
     theme_minimal() +
     labs(title = paste(var, "vs", x_variable),
@@ -661,7 +661,7 @@ for (var in integer.interest.variables) {
           axis.title = element_text(size = 12))
   
 # print the plot
-  print(plot)
+  print(boxplot)
 }
 ```
 
