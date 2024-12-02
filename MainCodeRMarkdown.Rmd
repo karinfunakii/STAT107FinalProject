@@ -1,6 +1,6 @@
 ---
 title: "MainCodeRMarkdown"
-author: "Kashish Rai, Karin Funaki, Chenzi --, Eric -- "
+author: "Kashish Rai, Karin Funaki, Chenzi Xiu, Eric -- "
 date: "December 11, 2024"
 output: html_document
 ---
@@ -330,22 +330,44 @@ if(!require(car)) install.packages("car")
 library(tidyverse)
 library(car)
 
-# Perform one-way ANOVA
-anova_model <- aov(Exam_Score ~ Family_Income, data = studentperformance)
+# List of independent variables for ANOVA
+independent_vars <- c("Family_Income", "Extracurricular_Activities", "Parental_Involvement")
 
-# Display the summary of the ANOVA
-summary(anova_model)
-
-# Conduct Tukey's Honest Significant Difference (HSD) test for post-hoc analysis
-tukey_result <- TukeyHSD(anova_model)
-
-# Display the Tukey test results
-print(tukey_result)
-
-# Optional: Visualization of the results
-boxplot(Exam_Score ~ Family_Income, data = data,
-        main = "Exam Score by Family Income",
-        xlab = "Family Income Level",
-        ylab = "Exam Score",
-        col = "lightblue")
+# Loop through each independent variable
+for (var in independent_vars) {
+  cat("Running ANOVA for:", var, "\n")
+  
+  formula <- as.formula(paste("Exam_Score ~", var))
+  
+  anova_model <- aov(formula, data = studentperformance)
+  
+  print(summary(anova_model))
+  
+  cat("Post-hoc results for:", var, "\n")
+  tukey_result <- TukeyHSD(anova_model)
+  print(tukey_result)
+  
+  par(mfrow = c(1,2))
+  
+  plot(fitted(anova_model), resid(anova_model),
+       main = paste("Residual Plot for", var),
+       xlab = "Fitted Values",
+       ylab = "Residuals",
+       col = "blue", pch = 19)
+  abline(h = 0, col = "red", lwd = 2)
+  
+  # QQ plot
+  qqnorm(resid(anova_model), main = paste("QQ Plot for", var))
+  qqline(resid(anova_model), col = "red", lwd = 2)
+  
+  # Reset graphics
+  par(mfrow = c(1, 1))
+  
+  # Create a boxplot for visualization
+  boxplot(formula, data = studentperformance,
+          main = paste("Exam Score by", var),
+          xlab = var,
+          ylab = "Exam Score",
+          col = "lightblue")
+}
 ```
