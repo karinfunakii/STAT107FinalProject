@@ -17,11 +17,6 @@ if(!require(tidyverse)){
   library(dplyr)
 }
 
-if(!require(ggbeeswarm)){
- install.packages("ggbeeswarm")
-  library(ggbeeswarm)
-}
-
 if(!require(ggforce)){
  install.packages("ggforce")
   library(ggforce)
@@ -76,12 +71,7 @@ common_na_strings <- c("", " ", "NA", "N/A", "-", "null", "NULL")
 studentperformance.initial %>%
   miss_scan_count(search = common_na_strings)
 
-#replace all identified values with NA to make cleaning easier
-studentperformance.cleaned <- studentperformance.initial %>%
-  replace_with_na(replace = list(common_na_strings
-  ))
-
-# replace blanks across all columns
+# proved that there are blanks -- replace blanks across all columns
 studentperformance.na <- studentperformance.initial %>%
   mutate(across(everything(), ~ ifelse(trimws(.) == "", NA, .)))
 
