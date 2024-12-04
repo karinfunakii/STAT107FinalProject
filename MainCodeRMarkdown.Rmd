@@ -1,411 +1,6 @@
 <<<<<<< HEAD
 ---
 title: "MainCodeRMarkdown"
-author: ""
-date: "Change to due date"
-output: html_document
----
-
-```{r install}
-if(!require(knitr)){
-    install.packages("knitr", repos = "https://cran.r-project.org")
-    library(knitr)
-}
-
-if(!require(tidyverse)){
-  install.packages("tidyverse")
-  library(tidyverse)
-  library(dplyr)
-}
-
-if(!require(ggbeeswarm)){
- install.packages("ggbeeswarm")
-  library(ggbeeswarm)
-}
-
-if(!require(ggforce)){
- install.packages("ggforce")
-  library(ggforce)
-}  
-
-if(!require(ggplot2)){
- install.packages("ggplot2")
-  library(ggplot2)
-}  
-```
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-#Question: Does family income affect the average educational progress? 
-
-#Karin: ANOVA 
-#Chenzi: Post-hoc ANOVA 
-#Eric: Interpretation of Visualizations / For loops for Anova Testing and visualization / Backward function for linear regression / All work is on Eric.rmd file 
-#Kashish: Visualization 
-
-#Family Income as correlated to other variables: 
-#Variable: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, School_Type, Parental_Educational_Level 
-
-**INITIAL DATA CLEAN + SET UP**
-```{r}
-# read initial data
-studentperformance.initial <- read.csv("StudentPerformanceFactors.csv")
-head(studentperformance.initial)
-```
-
-```{r}
-# clean data
-cleaned_data <- na.omit(studentperformance.initial)
-if (nrow(cleaned_data) == 0) {
-  stop("All rows contain missing values. Cannot proceed with model.")
-}
-str(cleaned_data)
-head(cleaned_data)
-```
-
-```{r}
-# change the class type of all categorical variables to factor levels so they could be seen as categories when analyzing using r. continuous variables being the integer type is good
-cleaned_data[] <- lapply(cleaned_data, function(x) {
-  if (is.character(x)) 
-    as.factor(x) 
-  else 
-    x
-})
-
-sapply(cleaned_data, class)
-cleaned_data
-
-studentperformance <- cleaned_data
-```
-
-```{r}
-# create new column for student progress
-studentperformance$Progress <- studentperformance$Exam_Score - studentperformance$Previous_Scores
-head(studentperformance, 5)
-```
-
-**AVERAGES OF OUR NUMERICAL VARIABLES**
-```{r}
-#see what kind of variables Hours_Studied and Tutoring Sessions Are 
-class(studentperformance$Hours_Studied)
-
-class(studentperformance$Tutoring_Sessions)
-
-#since these are factor variables: calculate the mode and frequency distribution
-
-# list of factor variables to calculate statistics for
-factor.interest.variables <- c("Hours_Studied", "Tutoring_Sessions")
-
-# calculate mode
-# define a function for mode calculation
-mode <- function(x) {
-  uniq_x <- unique(x)
-  uniq_x[which.max(tabulate(match(x, uniq_x)))]  # Return the most frequent value
-}
-
-#loop through each factor variable and calculate the mode
-for (var in factor.interest.variables) {
-  mode_value <- mode(studentperformance[[var]])
-  
-# print the results
-  cat("Mode for", var, ":", mode_value, "\n")
-}
-
-#calculate frequency distribution
-#loop through each factor variable and calculate the frequency distribution
-for (var in factor.interest.variables) {
-  freq_table <- table(studentperformance[[var]])
-
-# print the frequency table
-  cat("Frequency distribution for", var, ":\n")
-  print(freq_table)
-  cat("---------------------------------\n")
-}
-
-```
-
-ATTACH ANALYSIS HERE 
-
-**VISUALIZATION OF OUR CHOSEN VARIABLES**
-```{r}
-# barplot visualization of variables of interest: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, School_Type, Parental_Educational_Level 
-
-#create the interest variables that we need to graph
-interest.variables <- c("Extracurricular_Activities", "Access_to_Resources", "Hours_Studied", 
-               "Parental_Involvement", "Tutoring_Sessions", "School_Type", 
-               "Parental_Education_Level")
-
-# loop through each variable and create a bar chart
-for (var in interest.variables) {
-  barplot <- ggplot(studentperformance, aes(x = !!sym(var), fill = Family_Income)) +
-    geom_bar(position = "dodge") +
-    labs(title = paste("Distribution of", var, "by Family Income"),
-         x = var, 
-         y = "Count") +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  
-# print the plot
-  print(barplot)
-}
-```
-
-ATTACH ANALYSIS HERE 
-
-```{r}
-#mosaic chart visualization of our (5) categorical variables of interest: Extracurrciular_Activities, Access_to_Resources, Parental_Involvement, School_Type, Parental_Educational_Level 
-
-# create a new set of variables for just categorical ones we are testing 
-cat.interest.variables <-  c("Extracurricular_Activities", "Access_to_Resources",
-               "Parental_Involvement", "School_Type", "Parental_Education_Level")
-
-#install package to be able to plot a mosaic plot 
-if(!require(ggmosaic)){
-    install.packages("ggmosaic", repos = "https://cran.r-project.org")
-    library(ggmosaic)
-}
-
-#change to as factor 
-studentperformance$Family_Income <- as.factor(studentperformance$Family_Income)
-studentperformance[[var]] <- as.factor(studentperformance[[var]])
-
-# loop through each variable and create a mosaic plot
-for (var in cat.interest.variables) {
-  mosaic.plot <- ggplot(studentperformance) +
-    geom_mosaic(aes(weight = 1, x = product(Family_Income), fill = !!sym(var)), na.rm = TRUE) +
-    labs(title = paste("Mosaic Plot of", var, "by Family Income"),
-         x = "Family Income",
-         y = "Proportion",
-         fill = var) +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  
-  # Print the plot
-  print(mosaic.plot)
-}
-```
-
-ATTACH ANALYSIS HERE 
-
-```{r}
-#spineplot chart visualization of our (2) factor variables of interest: Hours_Studied and Tutoring Sessions
-
-# loop through each variable and create a spineplot
-for (var in factor.interest.variables) {
-  spineplot <- ggplot(studentperformance, aes(x = !!sym(var), fill = Family_Income)) +
-    geom_bar(position = "fill", width = 0.7) +
-    labs(title = paste("Spineplot of", var, "by Family Income"),
-         x = var,
-         y = "Proportion",
-         fill = "Family Income") +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  
-  # Print the plot
-  print(spineplot)
-}
-```
-
-ATTACH ANALYSIS HERE 
-
-**CORRELATION TEST OF CHISQUARE -- WE MIGHT NEED TO CHANGE ALPHA VALUE TO SOMETING DIFF IN ORDER TO MAKE SOME VARIABLES STATISTICALLY SIGNIFICANT; RN, NONE ARE HIGHLY CORRELATED** 
-```{r}
-#check for assumptions for chi-square
-
-# loop through each variable to check assumptions
-for (var in cat.interest.variables) {
-  # Create a contingency table
-  contingency_table <- table(studentperformance[[var]], studentperformance$Family_Income)
-  
-  # Check independence assumption (cannot directly test but mention it's assumed)
-  cat("Checking assumptions for", var, "vs Family_Income:\n")
-  cat("Independence of observations: Assumed based on data collection.\n")
-  
-  # Calculate expected frequencies
-  expected_freq <- chisq.test(contingency_table)$expected
-  
-  # Check if all expected frequencies are >= 5
-  if (all(expected_freq >= 5)) {
-    cat("All expected frequencies are >= 5. The Chi-Square test assumption is met.\n")
-  } else {
-    cat("Warning: Some expected frequencies are < 5. The Chi-Square test assumption is violated.\n")
-    cat("Expected frequencies:\n")
-    print(expected_freq)
-  }
-  
-  cat("\n-------------------------------------------\n")
-}
-```
-
-All assumptions for the Chi-Square Test have been met to run for categorical interest variables. 
-
-```{r}
-#chi-square analysis of our categorical variables of interest: Extracurricular_Activities, Access_to_Resources, Parental_Involvement, School_Type, Parental_Educational_Level 
-  
-# loop through each variable and run the Chi-Square test
-for (var in cat.interest.variables) {
-  contingency_table <- table(studentperformance[[var]], studentperformance$Family_Income)
-  chi_test <- chisq.test(contingency_table)
-  
-# display the results
-  cat("Chi-Square Test for", var, "vs Family_Income:\n")
-  print(chi_test)
-  cat("\n-------------------------------------------\n")
-}
-
-```
-
-For all variables: P-value of this chi-square test looks to be larger than 0.05 -- this means that there is weak correlation between the two variables.
-
-ANOVA TEst coding
-```{r}
-if(!require(tidyverse)) install.packages("tidyverse")
-if(!require(car)) install.packages("car")
-
-library(tidyverse)
-library(car)
-
-# Load the dataset
-data <- read.csv("StudentPerformanceFactors.csv")
-
-# Perform one-way ANOVA
-anova_model <- aov(Exam_Score ~ Family_Income, data = data)
-
-# Display the summary of the ANOVA
-summary(anova_model)
-
-# Conduct Tukey's Honest Significant Difference (HSD) test for post-hoc analysis
-tukey_result <- TukeyHSD(anova_model)
-
-# Display the Tukey test results
-print(tukey_result)
-
-# Optional: Visualization of the results
-boxplot(Exam_Score ~ Family_Income, data = data,
-        main = "Exam Score by Family Income",
-        xlab = "Family Income Level",
-        ylab = "Exam Score",
-        col = "lightblue")
-```
-
-
-ANOVA tests:
-
-First, we will perform an ANOVA test for family income on progress since family income is the main variable we are interested in.
-```{r}
-# The conditions for ANOVA are independence, normality, and homoskedasticity. We will assume that there is independence between and within family income groups, because it's not likely that one family's income is impacted by another family's income.
-
-# mean, standard deviation, number of observations, and progress for each family income group
-studentperformance %>%
-  group_by(Family_Income) %>%
-  summarize(
-    Mean = mean(Progress),
-    SD = sd(Progress),
-    n = n(),
-    SE = sd(Progress) / sqrt(n())
-  )
-
-# histogram
-studentperformance %>%
-  ggplot(aes(x = Progress)) +
-  geom_histogram(aes(fill = Family_Income)) +
-  facet_grid(cols = vars(Family_Income))
-
-# boxplot
-studentperformance %>%
-  ggplot(aes(x = Family_Income, y = Progress)) +
-  geom_boxplot(aes(fill = Family_Income)) +
-  labs(
-    x = "Family Income",
-    y = "Progress"
-  )
-```
-Although the boxplots show that there is one outlier for the medium family income group, we will not remove this since it's not as extreme to the point that it changes the variability of data drastically and is unlikely that it's caused by a measurement error. Overall, data from all family income groups seem to be nearly normal and the variability across those groups seem to be not significantly different, meeting the conditions for an ANOVA test.
-
-```{r}
-family_income_fit <- lm(Progress ~ Family_Income, data = studentperformance)
-anova(family_income_fit)
-```
-There is some significance in the difference of exam score progress between family income groups.
-
-Next, we will perform ANOVA tests for all categorical variables we tested above. We will assume independence for all variables since it's most likely that a student's home environment is not influenced by other students' home environments.
-```{r}
-for (var in cat.interest.variables){
-  studentperformance %>%
-    group_by(!!sym(var)) %>% # sym() makes a string into a symbol, !! unquotes
-    summarize(
-      Mean = mean(Progress),
-      SD = sd(Progress),
-      n = n(),
-      SE = sd(Progress) / sqrt(n())
-    ) %>%
-    print()
-  
-  hist <- studentperformance %>%
-    ggplot(aes(x = Progress)) +
-    geom_histogram(aes(fill = !!sym(var))) +
-    facet_grid(cols = vars(!!sym(var)))
-  
-  print(hist)
-  
-  
-  bp <- studentperformance %>%
-    ggplot(aes(x = var, y = Progress)) +
-    geom_boxplot(aes(fill = !!sym(var))) +
-    labs(
-      x = var,
-      y = "Progress"
-    )
-    
-  print(bp)
-}
-```
-All variables have outliers shown on the boxplots, but we will keep them for analysis since they are not too extreme to change their variabilities drastically. All of them look nearly normal with similar variabilities except for Parental_Education_Level.*
-
-```{r}
-anova_valid_cat_var <- c("Extracurricular_Activities", "Access_to_Resources",
-               "Parental_Involvement", "School_Type")
-
-for (var in anova_valid_cat_var){
-  formula <- as.formula(paste("Progress ~", var))
-  var_fit <- lm(formula, data = studentperformance)
-  var_anova <- anova(var_fit)
-  print(var_anova)
-}
-```
-Only Parental_Involvement showed that there wa a significant difference in progress between the groups. 
-
-Simple Linear Regression:
-```{r}
-# scatter plots
-for (var in factor.interest.variables){
-  scatter <- ggplot(data = studentperformance) +
-    geom_point(aes(x = !!sym(var), y = Progress))
-  print(scatter)
-}
-
-model_hours <- lm(Progress ~ Hours_Studied, data = studentperformance)
-summary(model_hours)
-
-ggplot(data = studentperformance) +
-  geom_point(aes(x = Hours_Studied, y = Progress)) +
-  geom_line(
-    data = fortify(model_hours),
-    aes(x = Hours_Studied, y = .fitted),
-    color = "red"
-  )
-```
-Looking at the scatter plots, there does not seem to be a linear trend between the number of tutoring sessions and progress in exam scores. However, there seems to be a slight linear trend between hours studied and progress, so we performed a simple linear regression for only this variable. The significance was high, and the best fit ine is represented as a red line on the last scatter plot.
-
-
-
-
-
-=======
----
-title: "MainCodeRMarkdown"
 author: "Kashish Rai, Karin Funaki, Chenzi Xiu, Eric -- "
 date: "December 11, 2024"
 output: html_document
@@ -448,13 +43,13 @@ if(!require(dplyr)){
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#Question: Does family income affect the average educational progress?
+#Question: Does family income affect the average educational progress and its related variables?
 
 #Karin: ANOVA #Chenzi: Post-hoc ANOVA #Eric: Interpretation of Visualizations / For loops for Anova Testing and visualization / Backward function for linear regression / All work is on Eric.rmd file #Kashish: Visualization
 
 #Family Income as correlated to other variables: #Variable: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, School_Type, Parental_Educational_Level,
 
-**Initial Data Clean + Set-Up**
+***Initial Data Clean + Set-Up***
 
 ```{r}
 # read initial data
@@ -513,6 +108,8 @@ sapply(cleaned_data, class)
 cleaned_data
 
 studentperformance <- cleaned_data
+
+studentperformance
 ```
 
 ```{r}
@@ -521,7 +118,7 @@ studentperformance$Progress <- studentperformance$Exam_Score - studentperformanc
 head(studentperformance, 5)
 ```
 
-**Averages of Numerical Variables**
+***Averages of Numerical Variables***
 
 ```{r}
 #see what kind of variables Hours_Studied and Tutoring Sessions Are 
@@ -578,9 +175,9 @@ for (var in integer.interest.variables) {
 
 ```
 
-ATTACH ANALYSIS HERE
+**Looking at our integer variables of interest here, it looks like an average amount of all surveyed students study for about 19.9 hours and have 1.5 tutoring sessions. This value does not change much throughout the other averages of median and mode: with study hours being around 20 hours for both and tutoring sessions being 1. This tells that most students without any differentiation by other variables study around those averages. Looking through the frequency distribution data, it looks like most students study in the data set study between 11-30 hours. It also looks like most students get between 0-2 tutoring sessions, with a smaller range beting frmo 3-5.**
 
-**Visualization**
+***Visualization***
 
 ```{r}
 # barplot visualization of variables of interest: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, School_Type, Parental_Educational_Level 
@@ -605,7 +202,8 @@ for (var in interest.variables) {
 }
 ```
 
-ATTACH ANALYSIS HERE
+**Looking through the visualization of seven interest variables in the data set that can be indicators of educational progress in students, all differentiated by income levels of the family, there are some interesting results. It does not seem like our original ideas about higher income leading to more access to educational resources is exactly true. In fact, students that come from a background that is of higher income seem to participate in less extracurricular activities as compared to their low and medium income peers. This same trend is reflected through the other interest variables as well: There is no overwhelming amount of students with high income backgrounds that access to resources, high income students spend less time studying, have less parental involvement, have lower amounts of tutoring sessions, are enrolled at lower rates in both public and private schools, and their parental educational level is at less proportions than those compared to low and middle income families.** 
+
 
 ```{r}
 #mosaic chart visualization of our (5) categorical variables of interest: Extracurrciular_Activities, Access_to_Resources, Parental_Involvement, School_Type, Parental_Educational_Level 
@@ -640,7 +238,7 @@ for (var in cat.interest.variables) {
 }
 ```
 
-ATTACH ANALYSIS HERE
+**Looking through just our five categorical variables of interest, we decided to go with a mosaic plot to represent the different data. Here, it looks like family income does not have a very significant effect on the proportions of the data. Really, it actually looks like the only income level that has different proportions than the others are low income families, with most differences in access to resources, parental involvement, and school type. This tells us that it is probable that low income families were the most surveyed in this study. These graphs also help us to know that there is not a significant proportional difference in the educational affecting variables between income groups!** 
 
 ```{r}
 #boxplot chart visualization of our (2) integer variables of interest: Hours_Studied and Tutoring Sessions
@@ -651,7 +249,10 @@ x_variable <- "Family_Income"
 
 # loop through each variable of interest to create boxplots
 for (var in integer.interest.variables) {
-  boxplot <- ggplot(studentperformance, aes(x = .data[[x_variable]], y = .data[[var]])) +
+ 
+  
+  
+   boxplot <- ggplot(studentperformance, aes(x = .data[[x_variable]], y = .data[[var]])) +
     geom_boxplot(fill = "skyblue", color = "darkblue", outlier.color = "red") +
     theme_minimal() +
     labs(title = paste(var, "vs", x_variable),
@@ -665,9 +266,9 @@ for (var in integer.interest.variables) {
 }
 ```
 
-ATTACH ANALYSIS HERE
+**Here, we used boxplots for our two integer variables of interest, because we wanted to have a visual representation of the averages differentiated across family income. In the case of the hours studied, it seems like there is no difference between the data across family income at all from the 25th to the 75th percentiles. It does seem like, however, that low and medium income families do seem to have many more outliers as compared to high family income. This tells us that the spread for those two income types is wider than high income spread. Looking through the tutoring sessions, the 25th to 75th percentile spread seems to be the same, but once again, the outliers for medium family income tells us that the spread is different than low and high family income.**
 
-**Chi-Square Test**
+***Chi-Square Test***
 
 ```{r}
 #check for assumptions for chi-square
@@ -697,7 +298,7 @@ for (var in cat.interest.variables) {
 }
 ```
 
-All assumptions for the Chi-Square Test have been met to run for categorical interest variables.
+**All assumptions for the Chi-Square Test have been met to run for categorical interest variables.**
 
 ```{r}
 #chi-square analysis of our categorical variables of interest: Extracurricular_Activities, Access_to_Resources, Parental_Involvement, School_Type, Parental_Educational_Level 
@@ -715,9 +316,10 @@ for (var in cat.interest.variables) {
 
 ```
 
-For all variables: P-value of this chi-square test for the categorical variables looks to be larger than 0.05 -- this means that there is weak correlation between the variables and family income. 
+**For all categorical interest variables: It looks to be that the p-value of this chi-square test for the categorical variables is larger than 0.05. This means that there is not much significant data to signify a correlation between the variables and family income. This conclusion has actually also been shown by the visualizations that we conducted previously. It does not seem like there is much difference between family income in the surveyed group and the variables that affect their educational variables. This means that if there was some difference between progress through the family income, it would not be because of changes in these specific categorical variables.**
 
-**ANOVA Test**
+
+***ANOVA Test***
 
 ```{r}
 if(!require(tidyverse)) install.packages("tidyverse")
@@ -769,9 +371,9 @@ for (var in independent_vars) {
 ```
 >>>>>>> 18b640b82198a2b64d8a326bc4368c5f72a202df
 
-ANOVA tests:
+***ANOVA tests:***
 
-First, we will perform an ANOVA test for family income on progress since family income is the main variable we are interested in.
+**First, we will perform an ANOVA test for family income on progress since family income is the main variable we are interested in.**
 ```{r}
 # The conditions for ANOVA are independence, normality, and homoskedasticity. We will assume that there is independence between and within family income groups, because it's not likely that one family's income is impacted by another family's income.
 
@@ -800,15 +402,17 @@ studentperformance %>%
     y = "Progress"
   )
 ```
-Although the boxplots show that there is one outlier for the medium family income group, we will not remove this since it's not as extreme to the point that it changes the variability of data drastically and is unlikely that it's caused by a measurement error. Overall, data from all family income groups seem to be nearly normal and the variability across those groups seem to be not significantly different, meeting the conditions for an ANOVA test.
+
+**Although the boxplots show that there is one outlier for the medium family income group, we will not remove this since it's not as extreme to the point that it changes the variability of data drastically and is unlikely that it's caused by a measurement error. Overall, data from all family income groups seem to be nearly normal and the variability across those groups seem to be not significantly different, meeting the conditions for an ANOVA test.**
 
 ```{r}
 family_income_fit <- lm(Progress ~ Family_Income, data = studentperformance)
 anova(family_income_fit)
 ```
-There is some significance in the difference of exam score progress between family income groups.
 
-Next, we will perform ANOVA tests for all categorical variables we tested above. We will assume independence for all variables since it's most likely that a student's home environment is not influenced by other students' home environments.
+**There is some significance in the difference of exam score progress between family income groups.**
+
+**Next, we will perform ANOVA tests for all categorical variables we tested above. We will assume independence for all variables since it's most likely that a student's home environment is not influenced by other students' home environments.**
 ```{r}
 for (var in cat.interest.variables){
   studentperformance %>%
@@ -840,7 +444,8 @@ for (var in cat.interest.variables){
   print(bp)
 }
 ```
-All variables have outliers shown on the boxplots, but we will keep them for analysis since they are not too extreme to change their variabilities drastically. All of them look nearly normal with similar variabilities except for Parental_Education_Level.*
+
+**All variables have outliers shown on the boxplots, but we will keep them for analysis since they are not too extreme to change their variabilities drastically. All of them look nearly normal with similar variabilities except for Parental_Education_Level.**
 
 ```{r}
 anova_valid_cat_var <- c("Extracurricular_Activities", "Access_to_Resources",
@@ -853,9 +458,11 @@ for (var in anova_valid_cat_var){
   print(var_anova)
 }
 ```
-Only Parental_Involvement showed that there wa a significant difference in progress between the groups. 
 
-Simple Linear Regression:
+**Only Parental_Involvement showed that there was a significant difference in progress between the groups.** 
+
+***Simple Linear Regression***
+
 ```{r}
 # scatter plots
 for (var in factor.interest.variables){
@@ -875,4 +482,5 @@ ggplot(data = studentperformance) +
     color = "red"
   )
 ```
-Looking at the scatter plots, there does not seem to be a linear trend between the number of tutoring sessions and progress in exam scores. However, there seems to be a slight linear trend between hours studied and progress, so we performed a simple linear regression for only this variable. The significance was high, and the best fit ine is represented as a red line on the last scatter plot.
+
+**Looking at the scatter plots, there does not seem to be a linear trend between the number of tutoring sessions and progress in exam scores. However, there seems to be a slight linear trend between hours studied and progress, so we performed a simple linear regression for only this variable. The significance was high, and the best fit ine is represented as a red line on the last scatter plot.**
