@@ -406,9 +406,51 @@ studentperformance %>%
 **Although the boxplots show that there is one outlier for the medium family income group, we will not remove this since it's not as extreme to the point that it changes the variability of data drastically and is unlikely that it's caused by a measurement error. Overall, data from all family income groups seem to be nearly normal and the variability across those groups seem to be not significantly different, meeting the conditions for an ANOVA test.**
 
 ```{r}
-#anova test for family income
+# Fit the model
 family_income_fit <- lm(Progress ~ Family_Income, data = studentperformance)
-anova(family_income_fit)
+
+# Perform ANOVA
+family_income_anova <- anova(family_income_fit)
+cat("\nANOVA Results for Family_Income:\n")
+print(family_income_anova)
+
+# Check the p-value from ANOVA
+p_value <- family_income_anova$`Pr(>F)`[1]
+if (p_value < 0.05) {
+  cat("\nSignificant effect detected (p < 0.05). Proceeding with post hoc tests...\n")
+  
+  # Residual diagnostics: Normality test
+  ks_test <- ks.test(residuals(family_income_fit), "pnorm", 
+                     mean = mean(residuals(family_income_fit)), 
+                     sd = sd(residuals(family_income_fit)))
+  cat("\nKolmogorov-Smirnov test for normality of residuals:\n")
+  print(ks_test)
+  
+  # Homogeneity of variances: Levene's test
+  levene_test <- car::leveneTest(Progress ~ Family_Income, data = studentperformance)
+  cat("\nLevene's test for homogeneity of variances:\n")
+  print(levene_test)
+  
+  # Post hoc tests
+  if (levene_test$`Pr(>F)`[1] > 0.05) {
+    # Variances are equal: Use Tukey's HSD
+    posthoc_result <- TukeyHSD(aov(family_income_fit))
+    cat("\nTukeyHSD Post-Hoc Test Results:\n")
+    print(posthoc_result)
+  } else {
+    # Variances are not equal: Use Pairwise t-tests with p-value adjustment
+    posthoc_result <- pairwise.t.test(
+      studentperformance$Progress, 
+      studentperformance$Family_Income, 
+      p.adjust.method = "holm"
+    )
+    cat("\nPairwise t-test with Holm correction (unequal variances):\n")
+    print(posthoc_result)
+  }
+} else {
+  cat("\nNo significant effect detected (p >= 0.05). Post hoc tests are not necessary.\n")
+}
+
 ```
 
 **There is some significance in the difference of exam score progress between family income groups.**
@@ -449,15 +491,83 @@ for (var in cat.interest.variables){
 **All variables have outliers shown on the boxplots, but we will keep them for analysis since they are not too extreme to change their variabilities drastically.**
 
 ```{r}
-anova_valid_cat_var <- c("Extracurricular_Activities", "Access_to_Resources",
-               "Parental_Involvement", "School_Type")
+library(car) # For Levene's Test
 
-for (var in anova_valid_cat_var){
-  formula <- as.formula(paste("Progress ~", var))
+anova_valid_cat_var <- c("Extracurricular_Activities", "Access_to_Resources",
+                         "Parental_Involvement", "School_Type")
+
+dependent_var <- "Progress"
+
+# Initialize vectors to store results
+p_values <- numeric(length(anova_valid_cat_var))
+names(p_values) <- anova_valid_cat_var
+
+# Store significant variables for post hoc testing
+significant_vars <- list()
+
+# Perform ANOVA for each variable
+for (i in seq_along(anova_valid_cat_var)) {
+  var <- anova_valid_cat_var[i]
+  formula <- as.formula(paste(dependent_var, "~", var))
   var_fit <- lm(formula, data = studentperformance)
   var_anova <- anova(var_fit)
+  
+  # Print ANOVA results
+  cat("\nANOVA Results for:", var, "\n")
   print(var_anova)
+  
+  # Extract p-value
+  p_values[i] <- var_anova$`Pr(>F)`[1]
+  
+  # Store the variable if p-value < 0.05
+  if (p_values[i] < 0.05) {
+    significant_vars[[var]] <- var_fit
+  }
 }
+
+# Output all p-values
+cat("\nP-values from ANOVA:\n")
+print(p_values)
+
+# Perform post hoc tests for significant variables
+if (length(significant_vars) > 0) {
+  for (var in names(significant_vars)) {
+    cat("\nPerforming post hoc tests for:", var, "\n")
+    var_fit <- significant_vars[[var]]
+    formula <- as.formula(paste(dependent_var, "~", var))
+    
+    # Check residual normality
+    ks_test <- ks.test(residuals(var_fit), "pnorm", 
+                       mean = mean(residuals(var_fit)), 
+                       sd = sd(residuals(var_fit)))
+    cat("Kolmogorov-Smirnov test for normality:\n")
+    print(ks_test)
+    
+    # Check homogeneity of variances
+    levene_test <- car::leveneTest(formula, data = studentperformance)
+    cat("Levene's test for homogeneity of variances:\n")
+    print(levene_test)
+    
+    if (levene_test$`Pr(>F)`[1] > 0.05) {
+      # Variances are equal: Use Tukey's HSD
+      posthoc_result <- TukeyHSD(aov(var_fit))
+      cat("\nTukeyHSD Post-Hoc Test:\n")
+      print(posthoc_result)
+    } else {
+      # Variances are not equal: Use Pairwise t-tests with corrections
+      posthoc_result <- pairwise.t.test(
+        studentperformance[[dependent_var]], 
+        studentperformance[[var]], 
+        p.adjust.method = "holm"
+      )
+      cat("\nPairwise t-test with Holm correction:\n")
+      print(posthoc_result)
+    }
+  }
+} else {
+  cat("\nNo variables with significant ANOVA results (p < 0.05).\n")
+}
+
 ```
 
 **Only Parental_Involvement showed that there was a significant difference in progress between the groups.** 
@@ -467,15 +577,29 @@ Post-hoc for Parental Involvement and Progress
 ***Simple Linear Regression***
 
 ```{r}
+
+model_hours <- lm(Progress ~ Hours_Studied, data = studentperformance)
+summary(model_hours)
+
+# Simple Linear Regression Conditions Check for Final Model 
+# 1. Residuals vs. Fitted Values (Linearity and Homoscedasticity)
+plot(model_hours, which = 1)
+
+# 2. Normal Q-Q Plot (Normality of Residuals)
+plot(model_hours, which = 2)
+
+# 3. Scale-Location Plot (Homoscedasticity)
+plot(model_hours, which = 3)
+
+# 4. Residuals vs Leverage Plot (Influential Points)
+plot(model_hours, which = 5)
+
 # scatter plots
 for (var in integer.interest.variables){
   scatter <- ggplot(data = studentperformance) +
     geom_point(aes(x = !!sym(var), y = Progress))
   print(scatter)
 }
-
-model_hours <- lm(Progress ~ Hours_Studied, data = studentperformance)
-summary(model_hours)
 
 ggplot(data = studentperformance) +
   geom_point(aes(x = Hours_Studied, y = Progress)) +
