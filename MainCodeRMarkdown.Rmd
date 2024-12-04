@@ -1,3 +1,8 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 <<<<<<< HEAD
 ---
 title: "MainCodeRMarkdown"
@@ -55,8 +60,6 @@ knitr::opts_chunk$set(echo = TRUE)
 # read initial data
 studentperformance.initial <- read.csv("StudentPerformanceFactors.csv")
 head(studentperformance.initial)
-
-studentperformance.initial
 ```
 
 ```{r}
@@ -465,7 +468,7 @@ for (var in anova_valid_cat_var){
 
 ```{r}
 # scatter plots
-for (var in factor.interest.variables){
+for (var in integer.interest.variables){
   scatter <- ggplot(data = studentperformance) +
     geom_point(aes(x = !!sym(var), y = Progress))
   print(scatter)
