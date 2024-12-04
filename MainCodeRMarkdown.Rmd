@@ -42,6 +42,9 @@ if(!require(dplyr)){
  install.packages("dplyr")
   library(dplyr)
 }  
+
+if(!require(car)) install.packages("car")
+library(car)
 ```
 
 ```{r setup, include=FALSE}
@@ -323,13 +326,8 @@ for (var in cat.interest.variables) {
 
 
 ***ANOVA Test***
-
+#move code around !! 
 ```{r}
-if(!require(tidyverse)) install.packages("tidyverse")
-if(!require(car)) install.packages("car")
-
-library(tidyverse)
-library(car)
 
 # List of independent variables for ANOVA
 independent_vars <- c("Family_Income", "Extracurricular_Activities", "Parental_Involvement")
@@ -372,9 +370,8 @@ for (var in independent_vars) {
           col = "lightblue")
 }
 ```
->>>>>>> 18b640b82198a2b64d8a326bc4368c5f72a202df
 
-***ANOVA tests:***
+***ANOVA Tests***
 
 **First, we will perform an ANOVA test for family income on progress since family income is the main variable we are interested in.**
 ```{r}
@@ -409,6 +406,7 @@ studentperformance %>%
 **Although the boxplots show that there is one outlier for the medium family income group, we will not remove this since it's not as extreme to the point that it changes the variability of data drastically and is unlikely that it's caused by a measurement error. Overall, data from all family income groups seem to be nearly normal and the variability across those groups seem to be not significantly different, meeting the conditions for an ANOVA test.**
 
 ```{r}
+#anova test for family income
 family_income_fit <- lm(Progress ~ Family_Income, data = studentperformance)
 anova(family_income_fit)
 ```
@@ -448,7 +446,7 @@ for (var in cat.interest.variables){
 }
 ```
 
-**All variables have outliers shown on the boxplots, but we will keep them for analysis since they are not too extreme to change their variabilities drastically. All of them look nearly normal with similar variabilities except for Parental_Education_Level.**
+**All variables have outliers shown on the boxplots, but we will keep them for analysis since they are not too extreme to change their variabilities drastically.**
 
 ```{r}
 anova_valid_cat_var <- c("Extracurricular_Activities", "Access_to_Resources",
@@ -463,6 +461,8 @@ for (var in anova_valid_cat_var){
 ```
 
 **Only Parental_Involvement showed that there was a significant difference in progress between the groups.** 
+
+Post-hoc for Parental Involvement and Progress 
 
 ***Simple Linear Regression***
 
@@ -486,4 +486,7 @@ ggplot(data = studentperformance) +
   )
 ```
 
-**Looking at the scatter plots, there does not seem to be a linear trend between the number of tutoring sessions and progress in exam scores. However, there seems to be a slight linear trend between hours studied and progress, so we performed a simple linear regression for only this variable. The significance was high, and the best fit ine is represented as a red line on the last scatter plot.**
+**Looking at the scatter plots, there does not seem to be a linear trend between the number of tutoring sessions and progress in exam scores. However, there seems to be a slight linear trend between hours studied and progress, so we performed a simple linear regression for only this variable. The significance was high, and the best fit line is represented as a red line on the last scatter plot.**
+
+
+Residual + QQPLOT for Hours Studied and Progress 
