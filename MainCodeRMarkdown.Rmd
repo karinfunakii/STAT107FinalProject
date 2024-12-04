@@ -61,7 +61,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # read initial data
-studentperformance.initial <- read.csv("StudentPerformanceFactors.csv")
+#studentperformance.initial <- read.csv("StudentPerformanceFactors.csv")
 head(studentperformance.initial)
 ```
 
