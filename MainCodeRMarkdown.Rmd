@@ -462,8 +462,6 @@ for (var in anova_valid_cat_var){
 
 **Only Parental_Involvement showed that there was a significant difference in progress between the groups.** 
 
-Post-hoc for Parental Involvement and Progress 
-
 ***Simple Linear Regression***
 
 ```{r}
@@ -488,5 +486,3 @@ ggplot(data = studentperformance) +
 
 **Looking at the scatter plots, there does not seem to be a linear trend between the number of tutoring sessions and progress in exam scores. However, there seems to be a slight linear trend between hours studied and progress, so we performed a simple linear regression for only this variable. The significance was high, and the best fit line is represented as a red line on the last scatter plot.**
 
-
-Residual + QQPLOT for Hours Studied and Progress 
