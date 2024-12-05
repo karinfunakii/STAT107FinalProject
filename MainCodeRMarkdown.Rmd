@@ -319,57 +319,9 @@ for (var in cat.interest.variables) {
   print(chi_test)
   cat("\n-------------------------------------------\n")
 }
-
 ```
 
 **For all categorical interest variables: It looks to be that the p-value of this chi-square test for the categorical variables is larger than 0.05. This means that there is not much significant data to signify a correlation between the variables and family income. This conclusion has actually also been shown by the visualizations that we conducted previously. It does not seem like there is much difference between family income in the surveyed group and the variables that affect their educational variables. This means that if there was some difference between progress through the family income, it would not be because of changes in these specific categorical variables.**
-
-
-***ANOVA Test***
-#move code around !! 
-```{r}
-
-# List of independent variables for ANOVA
-independent_vars <- c("Family_Income", "Extracurricular_Activities", "Parental_Involvement")
-
-# Loop through each independent variable
-for (var in independent_vars) {
-  cat("Running ANOVA for:", var, "\n")
-  
-  formula <- as.formula(paste("Exam_Score ~", var))
-  
-  anova_model <- aov(formula, data = studentperformance)
-  
-  print(summary(anova_model))
-  
-  cat("Post-hoc results for:", var, "\n")
-  tukey_result <- TukeyHSD(anova_model)
-  print(tukey_result)
-  
-  par(mfrow = c(1,2))
-  
-  plot(fitted(anova_model), resid(anova_model),
-       main = paste("Residual Plot for", var),
-       xlab = "Fitted Values",
-       ylab = "Residuals",
-       col = "blue", pch = 19)
-  abline(h = 0, col = "red", lwd = 2)
-  
-  # QQ plot
-  qqnorm(resid(anova_model), main = paste("QQ Plot for", var))
-  qqline(resid(anova_model), col = "red", lwd = 2)
-  
-  # Reset graphics
-  par(mfrow = c(1, 1))
-  
-  # Create a boxplot for visualization
-  boxplot(formula, data = studentperformance,
-          main = paste("Exam Score by", var),
-          xlab = var,
-          ylab = "Exam Score",
-          col = "lightblue")
-}
-```
 
 ***ANOVA Tests***
 
