@@ -11,6 +11,8 @@ date: "December 11, 2024"
 output: html_document
 ---
 
+**Installing all needed packages and running all the necessary libraries**
+
 ```{r install}
 if(!require(knitr)){
     install.packages("knitr", repos = "https://cran.r-project.org")
@@ -51,7 +53,7 @@ library(car)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#Question: Does family income affect the average educational progress and its related variables?
+#Question: Does family income affect the average educational progress and its related variables (Hours_Studied, Tutoring Sessions)?
 
 #Karin: ANOVA #Chenzi: Post-hoc ANOVA #Eric: Interpretation of Visualizations / For loops for Anova Testing and visualization / Backward function for linear regression / All work is on Eric.rmd file #Kashish: Visualization
 
@@ -61,7 +63,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # read initial data
-#studentperformance.initial <- read.csv("StudentPerformanceFactors.csv")
+studentperformance.initial <- read.csv("StudentPerformanceFactors.csv")
 head(studentperformance.initial)
 ```
 
@@ -124,7 +126,7 @@ studentperformance$Progress <- studentperformance$Exam_Score - studentperformanc
 head(studentperformance, 5)
 ```
 
-***Averages of Numerical Variables***
+**Measures of Central Tendencies of Numerical Variables***
 
 ```{r}
 #see what kind of variables Hours_Studied and Tutoring Sessions Are 
@@ -160,7 +162,7 @@ mode <- function(x) {
   uniq_x[which.max(tabulate(match(x, uniq_x)))]  # return the most frequent value
 }
 
-#loop through each factor variable and calculate the mode
+#loop through each interest variable and calculate the mode
 for (var in integer.interest.variables) {
   mode_value <- mode(studentperformance[[var]])
   
@@ -169,7 +171,7 @@ for (var in integer.interest.variables) {
 }
 
 #calculate frequency distribution
-#loop through each factor variable and calculate the frequency distribution
+#loop through each interest variable and calculate the frequency distribution
 for (var in integer.interest.variables) {
   freq_table <- table(studentperformance[[var]])
 
@@ -179,9 +181,18 @@ for (var in integer.interest.variables) {
   cat("---------------------------------\n")
 }
 
+#create histograms
+#loop through each interest variable and calculate the frequency distribution
+for (var in integer.interest.variables) {
+  freq_hist <- hist(studentperformance[[var]], main = var, xlab = var)
+
+# output histograms
+  freq_hist
+}
+
 ```
 
-**Looking at our integer variables of interest here, it looks like an average amount of all surveyed students study for about 19.9 hours and have 1.5 tutoring sessions. This value does not change much throughout the other averages of median and mode: with study hours being around 20 hours for both and tutoring sessions being 1. This tells that most students without any differentiation by other variables study around those averages. Looking through the frequency distribution data, it looks like most students study in the data set study between 11-30 hours. It also looks like most students get between 0-2 tutoring sessions, with a smaller range beting frmo 3-5.**
+**Looking at our integer variables of interest here, it looks like an average amount of all surveyed students study for about 19.9 hours and have 1.5 tutoring sessions. This value does not change much when observing the median and mode: with study hours being around 20 hours for both and tutoring sessions being 1. This tells that most students study around those averages. Looking through the frequency distribution data, it looks like most students study in the data set study between 11-30 hours. It also looks like most students get between 0-2 tutoring sessions, with a smaller range being from 3-5.**
 
 ***Visualization***
 
@@ -244,7 +255,7 @@ for (var in cat.interest.variables) {
 }
 ```
 
-**Looking through just our five categorical variables of interest, we decided to go with a mosaic plot to represent the different data. Here, it looks like family income does not have a very significant effect on the proportions of the data. Really, it actually looks like the only income level that has different proportions than the others are low income families, with most differences in access to resources, parental involvement, and school type. This tells us that it is probable that low income families were the most surveyed in this study. These graphs also help us to know that there is not a significant proportional difference in the educational affecting variables between income groups!** 
+**Looking through just our five categorical variables of interest, we decided to go with a mosaic plot to represent the different data. Here, it looks like family income does not have a very significant effect on the proportions of the data. Really, it actually looks like the only income level that has different proportions than the others are low income families, with most differences in access to resources, parental involvement, and school type. This tells us that it is probable that low income families were the most surveyed in this study. These graphs also indicate that there is not a significant proportional difference in the educational affecting variables between income groups!** 
 
 ```{r}
 #boxplot chart visualization of our (2) integer variables of interest: Hours_Studied and Tutoring Sessions
@@ -323,6 +334,8 @@ for (var in cat.interest.variables) {
 ```
 
 **For all categorical interest variables: It looks to be that the p-value of this chi-square test for the categorical variables is larger than 0.05. This means that there is not much significant data to signify a correlation between the variables and family income. This conclusion has actually also been shown by the visualizations that we conducted previously. It does not seem like there is much difference between family income in the surveyed group and the variables that affect their educational variables. This means that if there was some difference between progress through the family income, it would not be because of changes in these specific categorical variables.**
+
+**Refined Question: Is there a specific factor (out of the factors that we chose previously) that is affected by family income and in turn, affecting educational progress?**
 
 
 ***ANOVA Test***
@@ -612,5 +625,3 @@ ggplot(data = studentperformance) +
 
 **Looking at the scatter plots, there does not seem to be a linear trend between the number of tutoring sessions and progress in exam scores. However, there seems to be a slight linear trend between hours studied and progress, so we performed a simple linear regression for only this variable. The significance was high, and the best fit line is represented as a red line on the last scatter plot.**
 
-
-Residual + QQPLOT for Hours Studied and Progress 
