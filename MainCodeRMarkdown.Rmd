@@ -565,6 +565,8 @@ Only Parental_Involvement showed that there was a significant difference in prog
 ##### Simple Linear Regression Code + QQPlot and Residual Graphs
 
 ```{r}
+model_hours <- lm(Progress ~ Hours_Studied, data = studentperformance)
+
 # scatter plots
 for (var in integer.interest.variables){
   scatter <- ggplot(data = studentperformance) +
@@ -580,7 +582,6 @@ ggplot(data = studentperformance) +
     color = "red"
   )
 
-model_hours <- lm(Progress ~ Hours_Studied, data = studentperformance)
 summary(model_hours)
 
 # Simple Linear Regression Conditions Check for Final Model 
