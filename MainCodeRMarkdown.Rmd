@@ -565,6 +565,20 @@ Only Parental_Involvement showed that there was a significant difference in prog
 ##### Simple Linear Regression Code + QQPlot and Residual Graphs
 
 ```{r}
+# scatter plots
+for (var in integer.interest.variables){
+  scatter <- ggplot(data = studentperformance) +
+    geom_point(aes(x = !!sym(var), y = Progress))
+  print(scatter)
+}
+
+ggplot(data = studentperformance) +
+  geom_point(aes(x = Hours_Studied, y = Progress)) +
+  geom_line(
+    data = fortify(model_hours),
+    aes(x = Hours_Studied, y = .fitted),
+    color = "red"
+  )
 
 model_hours <- lm(Progress ~ Hours_Studied, data = studentperformance)
 summary(model_hours)
@@ -581,21 +595,6 @@ plot(model_hours, which = 3)
 
 # 4. Residuals vs Leverage Plot (Influential Points)
 plot(model_hours, which = 5)
-
-# scatter plots
-for (var in integer.interest.variables){
-  scatter <- ggplot(data = studentperformance) +
-    geom_point(aes(x = !!sym(var), y = Progress))
-  print(scatter)
-}
-
-ggplot(data = studentperformance) +
-  geom_point(aes(x = Hours_Studied, y = Progress)) +
-  geom_line(
-    data = fortify(model_hours),
-    aes(x = Hours_Studied, y = .fitted),
-    color = "red"
-  )
 ```
 
 
@@ -606,5 +605,7 @@ Looking at the scatter plots, there does not seem to be a linear trend between t
 
 Looking through all of the data and correlation, it looks like there is a relationship between the educational progress of a student based on their family income. The seven variables that we decided to test were Extracurricular Activities, Access to Resources, Hours Studied, Parental Involvement, Tutoring Sessions, School Type, and Parental Educational Level. The reason was because we thought that there was a correlation between those variables to family income, and in the end, to educational progress. 
 
+However, the only two of these variables showed a correlation with educational progress which were Parental Involvement and Hours Studied. So, we came to the conclusion that these were the two variables that could affect the educational progress of the student, even when it was not differentiated by family income. We also concluded that there was a relationship between family income and progress of a student, but we were not able to identify exactly which variable would be the one to affect that progress (it wasn't one of our chosen variables). So, there could be some other variables in the data set that we did not test that could be affected by family income, which in turn could affect the progress of the student.
 
-However, the only two of these variables that showed a correlation with family income being differentiated was Parental Involvement and Hours Studied. So, we came to the conclusion that these were the two variables that could affect the educational progress of the student through the lens of family income. We also concluded that because there was a relationship between family income and progress of a student, there could be some other variables in the data set that we did not test that could be affected by family income, which in turn could affect the progress of the student.
+
+If we did this project again, we would decide to test all the variables rather than just those that we previously believe could be affected by family income. It does seem like there is some variable in the data set that is affected by family income and then affecting the educational progress. Testing all variables might help with this matter. 
