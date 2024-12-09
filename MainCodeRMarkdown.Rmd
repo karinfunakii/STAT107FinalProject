@@ -52,21 +52,13 @@ library(car)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-<<<<<<< HEAD
-#Question: Does family income affect the average educational progress and its related variables (Hours_Studied, Tutoring Sessions)?
-=======
->>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
 
 ##### Initial Data Clean + Set-Up
 
 ```{r}
 # read initial data
 studentperformance.initial <- read.csv("StudentPerformanceFactors.csv")
-<<<<<<< HEAD
-head(studentperformance.initial)
-=======
 head(studentperformance.initial, 3)
->>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
 ```
 
 ```{r}
@@ -125,11 +117,9 @@ studentperformance$Progress <- studentperformance$Exam_Score - studentperformanc
 head(studentperformance, 3)
 ```
 
-<<<<<<< HEAD
 **Measures of Central Tendencies of Numerical Variables***
-=======
+
 ##### Averages of Numerical Variables
->>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
 
 ```{r}
 #see what kind of variables Hours_Studied and Tutoring Sessions Are 
@@ -195,10 +185,6 @@ for (var in integer.interest.variables) {
 
 ```
 
-<<<<<<< HEAD
-**Looking at our integer variables of interest here, it looks like an average amount of all surveyed students study for about 19.9 hours and have 1.5 tutoring sessions. This value does not change much when observing the median and mode: with study hours being around 20 hours for both and tutoring sessions being 1. This tells that most students study around those averages. Looking through the frequency distribution data, it looks like most students study in the data set study between 11-30 hours. It also looks like most students get between 0-2 tutoring sessions, with a smaller range being from 3-5.**
-=======
->>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
 
 Looking at our integer variables of interest here, it looks like an average amount of all surveyed students study for about 19.9 hours and have 1.5 tutoring sessions. This value does not change much throughout the other averages of median and mode: with study hours being around 20 hours for both and tutoring sessions being 1. This tells that most students without any differentiation by other variables study around those averages. Looking through the frequency distribution data, it looks like most students study in the data set study between 11-30 hours. It also looks like most students get between 0-2 tutoring sessions, with a smaller range beting frmo 3-5.
 
@@ -268,14 +254,10 @@ for (var in cat.interest.variables) {
 }
 ```
 
-<<<<<<< HEAD
-**Looking through just our five categorical variables of interest, we decided to go with a mosaic plot to represent the different data. Here, it looks like family income does not have a very significant effect on the proportions of the data. Really, it actually looks like the only income level that has different proportions than the others are low income families, with most differences in access to resources, parental involvement, and school type. This tells us that it is probable that low income families were the most surveyed in this study. These graphs also indicate that there is not a significant proportional difference in the educational affecting variables between income groups!** 
-=======
 
 Looking through just our five categorical variables of interest, we decided to go with a mosaic plot to represent the different data. Here, it looks like family income does not have a very significant effect on the proportions of the data. Really, it actually looks like the only income level that has different proportions than the others are low income families, with most differences in access to resources, parental involvement, and school type. This tells us that it is probable that low income families were the most surveyed in this study. These graphs also help us to know that there is not a significant proportional difference in the educational affecting variables between income groups!
 
 ###### Boxplot
->>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
 
 ```{r}
 #boxplot chart visualization of our (2) integer variables of interest: Hours_Studied and Tutoring Sessions
@@ -359,12 +341,9 @@ for (var in cat.interest.variables) {
 ```
 
 
-<<<<<<< HEAD
-**Refined Question: Is there a specific factor (out of the factors that we chose previously) that is affected by family income and in turn, affecting educational progress?**
-
-=======
 For all categorical interest variables: It looks to be that the p-value of this chi-square test for the categorical variables is larger than 0.05. This means that there is not much significant data to signify a correlation between the variables and family income. This conclusion has actually also been shown by the visualizations that we conducted previously. It does not seem like there is much difference between family income in the surveyed group and the variables that affect their educational variables. This means that if there was some difference between progress through the family income, it would not be because of changes in these specific categorical variables.
->>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
+
+**Refined Question: Is there a specific factor (out of the factors that we chose previously) that is affected by family income and in turn, affecting educational progress?**
 
 ##### ANOVA Test
 
@@ -622,12 +601,8 @@ Looking at the scatter plots, there does not seem to be a linear trend between t
 
 ##### Final Conclusions
 
-<<<<<<< HEAD
-=======
 
 Looking through all of the data and correlation, it looks like there is a relationship between the educational progress of a student based on their family income. The seven variables that we decided to test were Extracurricular Activities, Access to Resources, Hours Studied, Parental Involvement, Tutoring Sessions, School Type, and Parental Educational Level. The reason was because we thought that there was a correlation between those variables to family income, and in the end, to educational progress. 
 
 
 However, the only two of these variables that showed a correlation with family income being differentiated was Parental Involvement and Hours Studied. So, we came to the conclusion that these were the two variables that could affect the educational progress of the student through the lens of family income. We also concluded that because there was a relationship between family income and progress of a student, there could be some other variables in the data set that we did not test that could be affected by family income, which in turn could affect the progress of the student.
-
->>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
