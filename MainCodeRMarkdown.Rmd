@@ -6,7 +6,7 @@ output:
   html_document: default
   pdf_document: default
 ---
-### Question: Does family income affect the variables of Extracurrciular Activities, Access to Resources, Hours Studied, Parental Involvement, Tutoring Sessions, School Type, Parental Educational Level? Does the effect of family income on these variables affect the average educational progress of a student? 
+### Question: Does family income affect the variables of Extracurrciular Activities, Access to Resources, Hours Studied, Parental Involvement, Tutoring Sessions, School Type, Parental Educational Level? 
 
 #### R-Install 
 
@@ -343,7 +343,7 @@ for (var in cat.interest.variables) {
 
 For all categorical interest variables: It looks to be that the p-value of this chi-square test for the categorical variables is larger than 0.05. This means that there is not much significant data to signify a correlation between the variables and family income. This conclusion has actually also been shown by the visualizations that we conducted previously. It does not seem like there is much difference between family income in the surveyed group and the variables that affect their educational variables. This means that if there was some difference between progress through the family income, it would not be because of changes in these specific categorical variables.
 
-### Refined Question: Is there a specific factor (out of the factors that we chose previously) that is affected by family income and in turn, affecting educational progress? 
+### Refined Question: Is there a specific variables (out of the variable that we chose previously) that is affected by family income and in turn, affecting educational progress? 
 
 This is specifically since there does not seem to be any heavy correlation between any one of the variables with family income. So we will be testing them individually in relation to progress with ANOVA testing with independant and dependant variables. Then, we will be using simple linear regression. 
 
