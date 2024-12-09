@@ -382,7 +382,8 @@ studentperformance %>%
 ```
 
 
-Although the boxplots show that there is one outlier for the medium family income group, we will not remove this since it's not as extreme to the point that it changes the variability of data drastically and is unlikely that it's caused by a measurement error. Overall, data from all family income groups seem to be nearly normal and the variability across those groups seem to be not significantly different, meeting the conditions for an ANOVA test.
+In this analysis, we explored whether family income impacts students' educational progress by examining key descriptive statistics and visualizing the data. First, we calculated the mean, standard deviation, sample size, and standard error for progress across the three income groups: low, medium, and high. This summary helps us understand the central tendency and variability within each group. Then, we created histograms to visualize the distribution of progress for each income group. These histograms allow us to observe whether the data is approximately normal. Finally, we generated boxplots to compare the median, interquartile range, and potential outliers for progress among the income groups. Overall, data from all family income groups seem to be nearly normal and the variability across those groups seem to be not significantly different, meeting the conditions for an ANOVA test.
+
 
 ##### ANOVA Test Code + Post-Hoc Test
 
@@ -435,7 +436,7 @@ if (p_value < 0.05) {
 ```
 
 
-There is some significance in the difference of exam score progress between family income groups.
+The ANOVA results indicate that family income significantly impacts educational progress, with a p-value of 0.00211. Post-hoc Tukey tests reveal that students from low-income families perform significantly worse than those from high-income families (p < 0.001), while medium-income students show only marginally significant differences compared to high-income peers (p = 0.0451). However, there is no significant difference between low- and medium-income groups (p = 0.3418). These findings indicate that students from high-income families tend to achieve better educational outcomes, underscoring the gap in academic performance between different income groups.
 
 ##### Next, we will perform ANOVA tests for all categorical variables we tested above. We will assume independence for all variables since it's most likely that a student's home environment is not influenced by other students' home environments.
 ##### Assumptions of ANOVA Test
@@ -473,8 +474,7 @@ for (var in cat.interest.variables){
 ```
 
 
-All variables have outliers shown on the boxplots, but we will keep them for analysis since they are not too extreme to change their variabilities drastically.
-
+In this section, we expanded our ANOVA tests to analyze the relationship between various categorical variables and students' progress. These variables include extracurricular activities, access to resources, parental involvement, school type, and parental education level. We also visualized the data using histograms and boxplots. The histograms, segmented by each category, provided insights into the overall distribution of progress for different groups. This helped us verify whether the data for each category approximated normality, a critical assumption for ANOVA. The boxplots, on the other hand, allowed us to compare the median, variability, and potential outliers across categories.
 ##### ANOVA Test Code + Post-Hoc Test 
 
 ```{r}
@@ -558,7 +558,7 @@ if (length(significant_vars) > 0) {
 ```
 
 
-Only Parental_Involvement showed that there was a significant difference in progress between the groups.
+Our analysis revealed that among the factors tested—extracurricular activities, access to resources, school type, and parental involvement—only parental involvement significantly impacts students' educational progress, with a p-value of less than 0.01. Post-hoc tests further showed that students with high parental involvement perform significantly better than those with medium or low involvement, and medium involvement also provides a notable advantage over low involvement. These findings underscore the critical role of active parental engagement in shaping academic success, far outweighing the impact of other tested variables.
 
 #### Simple Linear Regression
 
