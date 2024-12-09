@@ -44,7 +44,6 @@ cleaned_data[] <- lapply(cleaned_data, function(x) {
 })
 
 sapply(cleaned_data, class)
-cleaned_data
 ```
 
 
@@ -152,7 +151,7 @@ for (cat_var in categorical_vars) {
   print(ks_test)
   
   # 2. Homogeneity of variances
-  levene_test <- leveneTest(formula, data = cleaned_data) #Used library(car)
+  levene_test <- leveneTest(formula, data = cleaned_data) 
   cat("\nLevene's Test for Homogeneity of Variances:\n")
   print(levene_test)
   
