@@ -1,15 +1,14 @@
 ---
-output:
-  pdf_document: default
-  html_document: default
----
-<<<<<<< HEAD
----
-title: "MainCodeRMarkdown"
-author: "Kashish Rai, Karin Funaki, Chenzi Xiu, Eric -- "
+title: "Family Income in Relation to Student Progress"
+author: "Kashish Rai, Karin Funaki, Chenzi Xiu, Eric Trang"
 date: "December 11, 2024"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
+#### Question: Does family income affect the variables of Extracurrciular Activities, Access to Resources, Hours Studied, Parental Involvement, Tutoring Sessions, School Type, Parental Educational Level? Does the effect of family income on these variables affect the average educational progress of a student? 
+
+##### R-Install 
 
 **Installing all needed packages and running all the necessary libraries**
 
@@ -53,18 +52,21 @@ library(car)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+<<<<<<< HEAD
 #Question: Does family income affect the average educational progress and its related variables (Hours_Studied, Tutoring Sessions)?
+=======
+>>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
 
-#Karin: ANOVA #Chenzi: Post-hoc ANOVA #Eric: Interpretation of Visualizations / For loops for Anova Testing and visualization / Backward function for linear regression / All work is on Eric.rmd file #Kashish: Visualization
-
-#Family Income as correlated to other variables: #Variable: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, School_Type, Parental_Educational_Level,
-
-***Initial Data Clean + Set-Up***
+##### Initial Data Clean + Set-Up
 
 ```{r}
 # read initial data
 studentperformance.initial <- read.csv("StudentPerformanceFactors.csv")
+<<<<<<< HEAD
 head(studentperformance.initial)
+=======
+head(studentperformance.initial, 3)
+>>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
 ```
 
 ```{r}
@@ -88,7 +90,7 @@ studentperformance.na <- studentperformance.initial %>%
 table(is.na(studentperformance.na))
 
 # make sure the NA replacement worked by looking at new data frame
-studentperformance.na
+head(studentperformance.na, 3)
 
 #omit all NA values from the data 
 cleaned_data <- na.omit(studentperformance.na)
@@ -98,9 +100,7 @@ if (nrow(cleaned_data) == 0) {
 
 #neatly organize and display cleaned data
 str(cleaned_data)
-head(cleaned_data)
-
-cleaned_data
+head(cleaned_data, 3)
 ```
 
 ```{r}
@@ -113,20 +113,23 @@ cleaned_data[] <- lapply(cleaned_data, function(x) {
 })
 
 sapply(cleaned_data, class)
-cleaned_data
 
 studentperformance <- cleaned_data
 
-studentperformance
+head(studentperformance, 3)
 ```
 
 ```{r}
 # create new column for student progress
 studentperformance$Progress <- studentperformance$Exam_Score - studentperformance$Previous_Scores
-head(studentperformance, 5)
+head(studentperformance, 3)
 ```
 
+<<<<<<< HEAD
 **Measures of Central Tendencies of Numerical Variables***
+=======
+##### Averages of Numerical Variables
+>>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
 
 ```{r}
 #see what kind of variables Hours_Studied and Tutoring Sessions Are 
@@ -136,7 +139,7 @@ class(studentperformance$Tutoring_Sessions)
 
 #since these are integer variables: calculate the mean, median, mode and frequency distribution
 
-# list of factor variables to calculate statistics for
+# list of interest variables to calculate statistics for
 integer.interest.variables <- c("Hours_Studied", "Tutoring_Sessions")
 
 #loop through each integer variable and calculate the mean
@@ -192,9 +195,16 @@ for (var in integer.interest.variables) {
 
 ```
 
+<<<<<<< HEAD
 **Looking at our integer variables of interest here, it looks like an average amount of all surveyed students study for about 19.9 hours and have 1.5 tutoring sessions. This value does not change much when observing the median and mode: with study hours being around 20 hours for both and tutoring sessions being 1. This tells that most students study around those averages. Looking through the frequency distribution data, it looks like most students study in the data set study between 11-30 hours. It also looks like most students get between 0-2 tutoring sessions, with a smaller range being from 3-5.**
+=======
+>>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
 
-***Visualization***
+Looking at our integer variables of interest here, it looks like an average amount of all surveyed students study for about 19.9 hours and have 1.5 tutoring sessions. This value does not change much throughout the other averages of median and mode: with study hours being around 20 hours for both and tutoring sessions being 1. This tells that most students without any differentiation by other variables study around those averages. Looking through the frequency distribution data, it looks like most students study in the data set study between 11-30 hours. It also looks like most students get between 0-2 tutoring sessions, with a smaller range beting frmo 3-5.
+
+##### Visualization
+
+###### Barplot 
 
 ```{r}
 # barplot visualization of variables of interest: Extracurrciular_Activities, Access_to_Resources, Hours Studied, Parental_Involvement, Tutoring_Sessions, School_Type, Parental_Educational_Level 
@@ -219,8 +229,11 @@ for (var in interest.variables) {
 }
 ```
 
-**Looking through the visualization of seven interest variables in the data set that can be indicators of educational progress in students, all differentiated by income levels of the family, there are some interesting results. It does not seem like our original ideas about higher income leading to more access to educational resources is exactly true. In fact, students that come from a background that is of higher income seem to participate in less extracurricular activities as compared to their low and medium income peers. This same trend is reflected through the other interest variables as well: There is no overwhelming amount of students with high income backgrounds that access to resources, high income students spend less time studying, have less parental involvement, have lower amounts of tutoring sessions, are enrolled at lower rates in both public and private schools, and their parental educational level is at less proportions than those compared to low and middle income families.** 
 
+Looking through the visualization of seven interest variables in the data set that can be indicators of educational progress in students, all differentiated by income levels of the family, there are some interesting results. It does not seem like our original ideas about higher income leading to more access to educational resources is exactly true. In fact, students that come from a background that is of higher income seem to participate in less extracurricular activities as compared to their low and medium income peers. This same trend is reflected through the other interest variables as well: There is no overwhelming amount of students with high income backgrounds that access to resources, high income students spend less time studying, have less parental involvement, have lower amounts of tutoring sessions, are enrolled at lower rates in both public and private schools, and their parental educational level is at less proportions than those compared to low and middle income families.
+
+
+###### Mosaic Plot
 
 ```{r}
 #mosaic chart visualization of our (5) categorical variables of interest: Extracurrciular_Activities, Access_to_Resources, Parental_Involvement, School_Type, Parental_Educational_Level 
@@ -255,7 +268,14 @@ for (var in cat.interest.variables) {
 }
 ```
 
+<<<<<<< HEAD
 **Looking through just our five categorical variables of interest, we decided to go with a mosaic plot to represent the different data. Here, it looks like family income does not have a very significant effect on the proportions of the data. Really, it actually looks like the only income level that has different proportions than the others are low income families, with most differences in access to resources, parental involvement, and school type. This tells us that it is probable that low income families were the most surveyed in this study. These graphs also indicate that there is not a significant proportional difference in the educational affecting variables between income groups!** 
+=======
+
+Looking through just our five categorical variables of interest, we decided to go with a mosaic plot to represent the different data. Here, it looks like family income does not have a very significant effect on the proportions of the data. Really, it actually looks like the only income level that has different proportions than the others are low income families, with most differences in access to resources, parental involvement, and school type. This tells us that it is probable that low income families were the most surveyed in this study. These graphs also help us to know that there is not a significant proportional difference in the educational affecting variables between income groups!
+
+###### Boxplot
+>>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
 
 ```{r}
 #boxplot chart visualization of our (2) integer variables of interest: Hours_Studied and Tutoring Sessions
@@ -283,9 +303,12 @@ for (var in integer.interest.variables) {
 }
 ```
 
-**Here, we used boxplots for our two integer variables of interest, because we wanted to have a visual representation of the averages differentiated across family income. In the case of the hours studied, it seems like there is no difference between the data across family income at all from the 25th to the 75th percentiles. It does seem like, however, that low and medium income families do seem to have many more outliers as compared to high family income. This tells us that the spread for those two income types is wider than high income spread. Looking through the tutoring sessions, the 25th to 75th percentile spread seems to be the same, but once again, the outliers for medium family income tells us that the spread is different than low and high family income.**
 
-***Chi-Square Test***
+Here, we used boxplots for our two integer variables of interest, because we wanted to have a visual representation of the averages differentiated across family income. In the case of the hours studied, it seems like there is no difference between the data across family income at all from the 25th to the 75th percentiles. It does seem like, however, that low and medium income families do seem to have many more outliers as compared to high family income. This tells us that the spread for those two income types is wider than high income spread. Looking through the tutoring sessions, the 25th to 75th percentile spread seems to be the same, but once again, the outliers for medium family income tells us that the spread is different than low and high family income.
+
+##### Chi-Square Test
+
+###### Assumptions for Chi-Square Test
 
 ```{r}
 #check for assumptions for chi-square
@@ -315,7 +338,10 @@ for (var in cat.interest.variables) {
 }
 ```
 
-**All assumptions for the Chi-Square Test have been met to run for categorical interest variables.**
+
+All assumptions for the Chi-Square Test have been met to run for categorical interest variables.
+
+###### Chi-Square Test Code 
 
 ```{r}
 #chi-square analysis of our categorical variables of interest: Extracurricular_Activities, Access_to_Resources, Parental_Involvement, School_Type, Parental_Educational_Level 
@@ -330,63 +356,21 @@ for (var in cat.interest.variables) {
   print(chi_test)
   cat("\n-------------------------------------------\n")
 }
-
 ```
 
-**For all categorical interest variables: It looks to be that the p-value of this chi-square test for the categorical variables is larger than 0.05. This means that there is not much significant data to signify a correlation between the variables and family income. This conclusion has actually also been shown by the visualizations that we conducted previously. It does not seem like there is much difference between family income in the surveyed group and the variables that affect their educational variables. This means that if there was some difference between progress through the family income, it would not be because of changes in these specific categorical variables.**
 
+<<<<<<< HEAD
 **Refined Question: Is there a specific factor (out of the factors that we chose previously) that is affected by family income and in turn, affecting educational progress?**
 
+=======
+For all categorical interest variables: It looks to be that the p-value of this chi-square test for the categorical variables is larger than 0.05. This means that there is not much significant data to signify a correlation between the variables and family income. This conclusion has actually also been shown by the visualizations that we conducted previously. It does not seem like there is much difference between family income in the surveyed group and the variables that affect their educational variables. This means that if there was some difference between progress through the family income, it would not be because of changes in these specific categorical variables.
+>>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
 
-***ANOVA Test***
-#move code around !! 
-```{r}
+##### ANOVA Test
 
-# List of independent variables for ANOVA
-independent_vars <- c("Family_Income", "Extracurricular_Activities", "Parental_Involvement")
+###### First, we will perform an ANOVA Test for family income on progress since family income is the main variable we are interested in. 
+###### Assumptions of ANOVA Test
 
-# Loop through each independent variable
-for (var in independent_vars) {
-  cat("Running ANOVA for:", var, "\n")
-  
-  formula <- as.formula(paste("Exam_Score ~", var))
-  
-  anova_model <- aov(formula, data = studentperformance)
-  
-  print(summary(anova_model))
-  
-  cat("Post-hoc results for:", var, "\n")
-  tukey_result <- TukeyHSD(anova_model)
-  print(tukey_result)
-  
-  par(mfrow = c(1,2))
-  
-  plot(fitted(anova_model), resid(anova_model),
-       main = paste("Residual Plot for", var),
-       xlab = "Fitted Values",
-       ylab = "Residuals",
-       col = "blue", pch = 19)
-  abline(h = 0, col = "red", lwd = 2)
-  
-  # QQ plot
-  qqnorm(resid(anova_model), main = paste("QQ Plot for", var))
-  qqline(resid(anova_model), col = "red", lwd = 2)
-  
-  # Reset graphics
-  par(mfrow = c(1, 1))
-  
-  # Create a boxplot for visualization
-  boxplot(formula, data = studentperformance,
-          main = paste("Exam Score by", var),
-          xlab = var,
-          ylab = "Exam Score",
-          col = "lightblue")
-}
-```
-
-***ANOVA Tests***
-
-**First, we will perform an ANOVA test for family income on progress since family income is the main variable we are interested in.**
 ```{r}
 # The conditions for ANOVA are independence, normality, and homoskedasticity. We will assume that there is independence between and within family income groups, because it's not likely that one family's income is impacted by another family's income.
 
@@ -416,7 +400,10 @@ studentperformance %>%
   )
 ```
 
-**Although the boxplots show that there is one outlier for the medium family income group, we will not remove this since it's not as extreme to the point that it changes the variability of data drastically and is unlikely that it's caused by a measurement error. Overall, data from all family income groups seem to be nearly normal and the variability across those groups seem to be not significantly different, meeting the conditions for an ANOVA test.**
+
+Although the boxplots show that there is one outlier for the medium family income group, we will not remove this since it's not as extreme to the point that it changes the variability of data drastically and is unlikely that it's caused by a measurement error. Overall, data from all family income groups seem to be nearly normal and the variability across those groups seem to be not significantly different, meeting the conditions for an ANOVA test.
+
+###### ANOVA Test Code + Post-Hoc Test
 
 ```{r}
 # Fit the model
@@ -466,9 +453,12 @@ if (p_value < 0.05) {
 
 ```
 
-**There is some significance in the difference of exam score progress between family income groups.**
 
-**Next, we will perform ANOVA tests for all categorical variables we tested above. We will assume independence for all variables since it's most likely that a student's home environment is not influenced by other students' home environments.**
+There is some significance in the difference of exam score progress between family income groups.
+
+###### Next, we will perform ANOVA tests for all categorical variables we tested above. We will assume independence for all variables since it's most likely that a student's home environment is not influenced by other students' home environments.
+###### Assumptions of ANOVA Test
+
 ```{r}
 for (var in cat.interest.variables){
   studentperformance %>%
@@ -501,7 +491,10 @@ for (var in cat.interest.variables){
 }
 ```
 
-**All variables have outliers shown on the boxplots, but we will keep them for analysis since they are not too extreme to change their variabilities drastically.**
+
+All variables have outliers shown on the boxplots, but we will keep them for analysis since they are not too extreme to change their variabilities drastically.
+
+###### ANOVA Test Code + Post-Hoc Test 
 
 ```{r}
 library(car) # For Levene's Test
@@ -583,11 +576,12 @@ if (length(significant_vars) > 0) {
 
 ```
 
-**Only Parental_Involvement showed that there was a significant difference in progress between the groups.** 
 
-Post-hoc for Parental Involvement and Progress 
+Only Parental_Involvement showed that there was a significant difference in progress between the groups.
 
-***Simple Linear Regression***
+##### Simple Linear Regression
+
+###### Simple Linear Regression Code + QQPlot and Residual Graphs
 
 ```{r}
 
@@ -623,5 +617,17 @@ ggplot(data = studentperformance) +
   )
 ```
 
-**Looking at the scatter plots, there does not seem to be a linear trend between the number of tutoring sessions and progress in exam scores. However, there seems to be a slight linear trend between hours studied and progress, so we performed a simple linear regression for only this variable. The significance was high, and the best fit line is represented as a red line on the last scatter plot.**
 
+Looking at the scatter plots, there does not seem to be a linear trend between the number of tutoring sessions and progress in exam scores. However, there seems to be a slight linear trend between hours studied and progress, so we performed a simple linear regression for only this variable. The significance was high, and the best fit line is represented as a red line on the last scatter plot.
+
+##### Final Conclusions
+
+<<<<<<< HEAD
+=======
+
+Looking through all of the data and correlation, it looks like there is a relationship between the educational progress of a student based on their family income. The seven variables that we decided to test were Extracurricular Activities, Access to Resources, Hours Studied, Parental Involvement, Tutoring Sessions, School Type, and Parental Educational Level. The reason was because we thought that there was a correlation between those variables to family income, and in the end, to educational progress. 
+
+
+However, the only two of these variables that showed a correlation with family income being differentiated was Parental Involvement and Hours Studied. So, we came to the conclusion that these were the two variables that could affect the educational progress of the student through the lens of family income. We also concluded that because there was a relationship between family income and progress of a student, there could be some other variables in the data set that we did not test that could be affected by family income, which in turn could affect the progress of the student.
+
+>>>>>>> 041b6f367034fd3062037d9aa20fb8884c2059ff
